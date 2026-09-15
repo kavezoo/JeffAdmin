@@ -4,12 +4,15 @@ declare(strict_types=1);
 namespace JeffAdmin;
 
 use Cake\Console\CommandCollection;
+use Cake\Controller\Controller;
 use Cake\Core\BasePlugin;
+use Cake\Core\Configure;
 use Cake\Core\ContainerInterface;
 use Cake\Core\PluginApplicationInterface;
+use Cake\Event\EventInterface;
+use Cake\Event\EventManager;
 use Cake\Http\MiddlewareQueue;
 use Cake\Routing\RouteBuilder;
-use Cake\Core\Configure;
 
 /**
  * Plugin for JeffAdmin
@@ -27,8 +30,20 @@ class JeffAdminPlugin extends BasePlugin
      */
     public function bootstrap(PluginApplicationInterface $app): void
     {
-        // remove this method hook if you don't need it
         Configure::load('JeffAdmin.show', 'default');
+
+        // Icon helper automatikusan — a host AppView-ba nem kell semmit írni.
+        EventManager::instance()->on(
+            'Controller.initialize',
+            function (EventInterface $event): void {
+                $controller = $event->getSubject();
+                if (!$controller instanceof Controller) {
+                    return;
+                }
+
+                $controller->viewBuilder()->addHelper('JeffAdmin.Icon');
+            }
+        );
     }
 
     /**

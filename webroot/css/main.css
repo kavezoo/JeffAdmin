@@ -103,6 +103,17 @@ body.app .table-data2.table tbody tr:last-child > * {
   border-bottom: 2px solid #b0b0b0;
 }
 
+/* Utoljára érintett rekord (view / edit / add után) */
+body.app .table-data2.table tbody tr.is-last-touched > td {
+  background-color: #dfd !important;
+  border-top: 2px solid #000000 !important;
+  border-bottom: 2px solid #000000 !important;
+}
+
+body.app .table-data2.table-hover tbody tr.is-last-touched:hover > td {
+  background-color: #dfd !important;
+}
+
 body.app .table-data2.table thead th .au-checkbox {
   position: relative;
   top: 0;
@@ -227,6 +238,17 @@ body.app .table-data2.table td.number,
 body.app .table-data2.table td.integer {
 	text-align: right;
 	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Pos — középre, keskeny oszlop */
+body.app .table-data2.table th.pos,
+body.app .table-data2.table td.pos {
+	text-align: center;
+	white-space: nowrap;
+	width: 1%;
+	padding-left: 0.4rem;
+	padding-right: 0.4rem;
 	font-variant-numeric: tabular-nums;
 }
 
