@@ -176,9 +176,10 @@
     btnInc.title = 'Növelés';
     btnInc.innerHTML = '<i class="fa-solid fa-plus" aria-hidden="true"></i>';
 
-    // Named hidden field always carries canonical POST value
+    // Named hidden field always carries canonical POST value.
+    // Disabled/readonly fields must not submit — keep the original name.
     let hidden = null;
-    if (input.name) {
+    if (input.name && !input.disabled && !input.readOnly) {
       hidden = document.createElement('input');
       hidden.type = 'hidden';
       hidden.name = input.name;
@@ -191,6 +192,12 @@
     wrap.appendChild(input);
     wrap.appendChild(btnInc);
     if (hidden) wrap.appendChild(hidden);
+
+    if (input.disabled || input.readOnly) {
+      wrap.classList.add('number-spinner--disabled');
+      btnDec.disabled = true;
+      btnInc.disabled = true;
+    }
 
     const syncSubmit = (numericOrNull) => {
       if (!hidden) return;
@@ -213,6 +220,7 @@
     };
 
     const nudge = (dir) => {
+      if (input.disabled || input.readOnly) return;
       const current = read();
       const base = current == null ? (min != null ? min : 0) : current;
       write(base + dir * step);

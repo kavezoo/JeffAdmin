@@ -9,6 +9,7 @@ use Cake\Core\ContainerInterface;
 use Cake\Core\PluginApplicationInterface;
 use Cake\Http\MiddlewareQueue;
 use Cake\Routing\RouteBuilder;
+use Cake\Core\Configure;
 
 /**
  * Plugin for JeffAdmin
@@ -27,6 +28,7 @@ class JeffAdminPlugin extends BasePlugin
     public function bootstrap(PluginApplicationInterface $app): void
     {
         // remove this method hook if you don't need it
+        Configure::load('JeffAdmin.show', 'default');
     }
 
     /**

@@ -25,6 +25,7 @@
 		'JeffAdmin./vendor/tom-select/css/tom-select.bootstrap5.min',
 		'JeffAdmin./vendor/flatpickr/dist/flatpickr.min',
 		'JeffAdmin./vendor/css-hamburgers/hamburgers.min',
+		'JeffAdmin./vendor/sweetalert2/sweetalert2.min',
 		'JeffAdmin./css/theme',
 		'JeffAdmin./css/app',
 		'JeffAdmin./css/main',
@@ -110,11 +111,14 @@
 		'JeffAdmin./vendor/tom-select/js/tom-select.complete.min',
 		'JeffAdmin./vendor/flatpickr/dist/flatpickr.min',
 		'JeffAdmin./vendor/flatpickr/dist/l10n/hu',
+		'JeffAdmin./vendor/sweetalert2/sweetalert2.min',
 		'JeffAdmin./js/form-datetime-config',	// xx
 		'JeffAdmin./js/form-datetime',			// xx
 		'JeffAdmin./js/form-number-config',		// xx
 		'JeffAdmin./js/number-spinner',
 		'JeffAdmin./js/table-row-select',
+		'JeffAdmin./js/table-row-dblclick',
+		'JeffAdmin./js/confirm-delete',
 		'JeffAdmin./vendor/hugerte/hugerte.min',
 		'JeffAdmin./js/bootstrap5-init',
 		'JeffAdmin./js/main-vanilla',

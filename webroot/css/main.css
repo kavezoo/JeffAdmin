@@ -159,6 +159,23 @@ body.app .table-data2.table thead th .sort-arrows__icon {
   display: block;
 }
 
+/* String / email — formázás később */
+body.app .table-data2.table th.string,
+body.app .table-data2.table td.string,
+body.app .table-data2.table th.email,
+body.app .table-data2.table td.email {
+	/* placeholder */
+}
+
+body.app .table-data2.table th.action,
+body.app .table-data2.table td.action {
+	width: 1%;
+	white-space: nowrap;
+	text-align: right;
+	padding-left: 0.5rem;
+	padding-right: 0.75rem;
+}
+
 /* Date / time columns — center, snug width (content + small padding) */
 body.app .table-data2.table th.date,
 body.app .table-data2.table td.date,
@@ -944,6 +961,62 @@ body.app .number-spinner__btn[data-spinner-dec] {
 
 body.app .number-spinner__btn[data-spinner-inc] {
   border-left: 1px solid var(--m-border, #e4e7ec);
+}
+
+body.app .number-spinner--disabled,
+body.app .number-spinner:has(input:disabled) {
+  background: #e9ecef;
+  pointer-events: none;
+}
+
+body.app .number-spinner--disabled .number-spinner__btn,
+body.app .number-spinner:has(input:disabled) .number-spinner__btn {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+body.app .ts-wrapper.disabled,
+body.app .ts-wrapper.form-select.disabled {
+  background-color: #e9ecef !important;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+body.app .select-with-action__btn:disabled {
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+/* ----------------------------------------------------------------------------
+   13. SweetAlert2 — törlés megerősítés (piros hangsúly)
+   ---------------------------------------------------------------------------- */
+
+body.app .swal2-jeffadmin-delete {
+  border-top: 4px solid #dc3545;
+}
+
+body.app .swal2-jeffadmin-delete .swal2-icon.swal2-warning {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+body.app .swal2-jeffadmin-delete__confirm.swal2-confirm {
+  background-color: #dc3545 !important;
+  border-color: #b02a37 !important;
+  box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.35);
+}
+
+body.app .swal2-jeffadmin-delete__confirm.swal2-confirm:focus {
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.45);
+}
+
+body.app .swal2-jeffadmin-delete__confirm.swal2-confirm:hover {
+  background-color: #b02a37 !important;
+}
+
+/* Dupla kattintásra navigáló listsor */
+body.app .table-data2.table tbody tr[data-dblclick-url] {
+  cursor: pointer;
 }
 
 /* ----------------------------------------------------------------------------

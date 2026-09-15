@@ -70,7 +70,12 @@ ready(() => {
         options.allowEmptyOption = true;
       }
 
-      new TomSelect(el, options);
+      const ts = new TomSelect(el, options);
+      if (el.disabled) {
+        ts.disable();
+        const actionBtn = el.closest('.select-with-action')?.querySelector('.select-with-action__btn');
+        if (actionBtn) actionBtn.disabled = true;
+      }
     });
   }
 
