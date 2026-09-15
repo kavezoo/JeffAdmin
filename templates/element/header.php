@@ -3,8 +3,14 @@
             <div class="container-fluid">
               <div class="header-wrap">
                 <button class="sidebar-toggle js-sidebar-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="main-sidebar"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
-                <form class="form-header" role="search" onsubmit="return false"><i class="fa-solid fa-magnifying-glass form-header__icon" aria-hidden="true"></i>
-                  <input class="au-input au-input--xl" type="search" name="search" placeholder="Search anything…" aria-label="Search"><kbd class="form-header__hint" aria-hidden="true">⌘K</kbd>
+                <form class="form-header" role="search" method="get" action="<?= h($this->Url->build(['action' => 'index'])) ?>">
+                  <i class="fa-solid fa-magnifying-glass form-header__icon" aria-hidden="true"></i>
+                  <input class="au-input au-input--xl" type="search" name="search" value="<?= h($listSearch ?? '') ?>" placeholder="<?= h(__('Search anything…')) ?>" aria-label="<?= h(__('Search')) ?>">
+<?php if (!empty($listSort)) : ?>
+                  <input type="hidden" name="sort" value="<?= h((string)$listSort) ?>">
+                  <input type="hidden" name="direction" value="<?= h((string)($listDirection ?? 'asc')) ?>">
+<?php endif; ?>
+                  <kbd class="form-header__hint" aria-hidden="true">⌘K</kbd>
                 </form>
                 <div class="header-button">
                   <div class="noti-wrap">
@@ -88,11 +94,13 @@
                   </div>
                   <div class="account-wrap">
                     <div class="account-item clearfix js-item-menu" role="button" tabindex="0" aria-haspopup="true" aria-label="Account menu">
-                      <div class="image"><img src="images/icon/avatar-01.jpg" alt="John Doe"></div>
+                      <div class="image"><?= $this->Icon->filled('user', ["alt" => "John Doe"]) ?></div>
                       <div class="content"><a class="js-acc-btn" href="#">john doe</a></div>
                       <div class="account-dropdown js-dropdown border border-2 shadow">
                         <div class="info clearfix">
-                          <div class="image"><a href="#"><img src="images/icon/avatar-01.jpg" alt="John Doe"></a></div>
+                          <div class="image"><a href="#">
+								<?= $this->Icon->filled('user', ["alt" => "John Doe"]) ?>
+							</a></div>
                           <div class="content">
                             <h5 class="name"><a href="#">john doe</a></h5><span class="email">johndoe@example.com</span>
                           </div>

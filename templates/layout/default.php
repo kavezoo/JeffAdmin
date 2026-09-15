@@ -92,12 +92,9 @@
             </div>
 */ ?>
 
+<?= $this->fetch('content') ?>
 
-				<!-- Content -->
-				<?= $this->fetch('content') ?>
-
-                <?php //include_once("footer.php"); ?>
-				<?= $this->element('JeffAdmin.footer') ?>
+              <?= $this->element('JeffAdmin.footer') ?>
 
             </div>
           </div>

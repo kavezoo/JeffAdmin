@@ -17,6 +17,7 @@ use Cake\View\StringTemplateTrait;
  *   $this->Icon->icon('mail', 'record-link__icon', 'filled')
  *   $this->Icon->outline('mail', 'record-link__icon')
  *   $this->Icon->filled('mail', ['class' => 'record-link__icon', 'title' => 'Email'])
+ *   $this->Icon->visible($entity->visible)
  */
 class IconHelper extends Helper
 {
@@ -129,6 +130,32 @@ class IconHelper extends Helper
     }
 
     /**
+     * Boolean visible mező listanézethez: eye / eye-off ikon tooltippel.
+     *
+     *   <?= $this->Icon->visible($entity->visible) ?>
+     *
+     * @param bool|int|string|null $visible Igazságos érték (1/0, true/false)
+     * @param array<string, mixed> $options Extra SVG attribútumok / class felülírás
+     */
+    public function visible(bool|int|string|null $visible = false, array $options = []): string
+    {
+        $isVisible = (bool)$visible;
+        $label = $isVisible ? __('Visible') : __('Not visible');
+        $class = trim(
+            'boolean-icon ' . ($isVisible ? 'boolean-icon--yes' : 'boolean-icon--no')
+            . ' ' . ($options['class'] ?? '')
+        );
+        unset($options['class']);
+
+        return $this->outline($isVisible ? 'eye' : 'eye-off', array_merge([
+            'class' => $class,
+            'data-bs-toggle' => 'tooltip',
+            'data-bs-title' => $label,
+            'aria-label' => $label,
+        ], $options));
+    }
+
+    /**
      * String második paramétert CSS classként kezeli.
      *
      * @param array|string $options
@@ -160,8 +187,11 @@ class IconHelper extends Helper
 
         $content = preg_replace('/<\?xml.*?\?>/i', '', $content);
         $content = preg_replace('/<!--.*?-->/s', '', $content);
+        // Egy sorba: a böngésző forrásnézetében ne legyen balra húzott tördelés.
+        $content = preg_replace('/\s+/', ' ', trim((string)$content));
+        $content = preg_replace('/> </', '><', $content);
 
-        $this->_svgCache[$filePath] = trim((string)$content);
+        $this->_svgCache[$filePath] = $content;
 
         return $this->_svgCache[$filePath];
     }

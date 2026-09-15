@@ -37,5 +37,16 @@
 
   window.JeffAdminRowDblClick = { init };
 
-  ready(() => init());
+  ready(() => {
+    init();
+    const last = document.querySelector('table.table-data2 tbody tr.is-last-touched');
+    if (!last) {
+      return;
+    }
+
+    const header = document.querySelector('.header-desktop, .header-mobile, .header-wrap');
+    const offset = (header ? header.getBoundingClientRect().height : 64) + 16;
+    const top = last.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  });
 })(window, document);

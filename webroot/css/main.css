@@ -23,6 +23,47 @@ body.app .header-wrap {
   border-bottom: 1px solid lightgray;
 }
 
+/* Account chip — név függőlegesen középen (clearfix ::after flexben lefelé tolná) */
+body.app .header-wrap .account-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+body.app .header-wrap .account-item.clearfix::before,
+body.app .header-wrap .account-item.clearfix::after {
+  content: none;
+  display: none;
+}
+
+body.app .header-wrap .account-item > .image {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  float: none;
+}
+
+body.app .header-wrap .account-item > .image .icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+body.app .header-wrap .account-item > .content {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+}
+
+body.app .header-wrap .account-item > .content > a {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+}
+
 .copyright {
   padding: 60px 0;
   padding-top: 10px;
@@ -104,6 +145,10 @@ body.app .table-data2.table tbody tr:last-child > * {
 }
 
 /* Utoljára érintett rekord (view / edit / add után) */
+body.app .table-data2.table tbody tr.is-last-touched {
+  scroll-margin-top: 80px;
+}
+
 body.app .table-data2.table tbody tr.is-last-touched > td {
   background-color: #dfd !important;
   border-top: 2px solid #000000 !important;
@@ -275,6 +320,10 @@ body.app .table-data2.table tbody td.boolean {
 body.app .table-data2.table .boolean-icon {
 	font-size: 1rem;
 	line-height: 1;
+	width: 1.1rem;
+	height: 1.1rem;
+	display: inline-block;
+	vertical-align: middle;
 }
 
 body.app .table-data2.table .boolean-icon--yes {
@@ -283,6 +332,31 @@ body.app .table-data2.table .boolean-icon--yes {
 
 body.app .table-data2.table .boolean-icon--no {
 	color: #9aa0a6;
+}
+
+/* Icon helper SVG — gombok és műveleti sor */
+body.app .btn .icon,
+body.app .m-btn .icon,
+body.app .select-with-action__btn .icon {
+	width: 1.1em;
+	height: 1.1em;
+	display: inline-block;
+	vertical-align: -0.15em;
+}
+
+body.app .table-data-feature .item .icon {
+	width: 20px;
+	height: 20px;
+	color: #808080;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	display: block;
+}
+
+body.app .table-data-feature .item .icon.text-danger {
+	color: var(--bs-danger, #dc3545);
 }
 
 /* Meta datetime (Létrehozva / Módosítva) — egy oszlop, két sor; th = mint a többi címke */
