@@ -186,24 +186,10 @@ $containerLess = ['inputContainer' => '{{ '{{' }}content{{ '}}' }}'];
                     <div class="card-footer border-top">
                       <div class="offset-md-2">
 <?php if (!empty($show['editButton'])) : ?>
-                        <?= $this->Html->link(
-                            $this->Icon->outline('edit') . ' ' . __('Edit'),
-                            ['action' => 'edit', {{ pK|raw }}],
-                            ['class' => 'btn btn-primary', 'escape' => false]
-                        ) ?>
+                        <?= $this->Action->editButton({{ pK|raw }}) ?>
 <?php endif; ?>
 <?php if (!empty($show['cancelButton'])) : ?>
-                        <?= $this->Html->link(
-                            $this->Icon->outline('x') . ' ' . __('Cancel'),
-                            [
-                                'action' => 'index',
-                                '?' => array_filter([
-                                    'last' => {{ pK|raw }},
-                                    'listPage' => $this->request->getQuery('listPage'),
-                                ], fn($v) => $v !== null && $v !== ''),
-                            ],
-                            ['class' => 'btn btn-secondary', 'escape' => false]
-                        ) ?>
+                        <?= $this->Action->cancelButton({{ pK|raw }}) ?>
 <?php endif; ?>
                       </div>
                     </div>

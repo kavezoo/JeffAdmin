@@ -75,17 +75,7 @@ $show = array_merge($show['edit'] ?? [], $showLocal['edit']);
                         ) ?>
 <?php endif; ?>
 <?php if (!empty($show['cancelButton'])) : ?>
-                        <?= $this->Html->link(
-                            $this->Icon->outline('x') . ' ' . __('Cancel'),
-                            [
-                                'action' => 'index',
-                                '?' => array_filter([
-                                    'last' => ${{ singularVar }}->{{ primaryKey[0] }},
-                                    'listPage' => $this->request->getQuery('listPage'),
-                                ], fn($v) => $v !== null && $v !== ''),
-                            ],
-                            ['class' => 'btn btn-secondary', 'escape' => false]
-                        ) ?>
+                        <?= $this->Action->cancelButton(${{ singularVar }}->{{ primaryKey[0] }}) ?>
 <?php endif; ?>
                       </div>
                     </div>

@@ -89,9 +89,14 @@ body.app .header-wrap .account-item > .content > a {
    2. Oldalsáv
    ---------------------------------------------------------------------------- */
 
-body.app .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow {
+/* Főmenü aktív — Tables (has-sub) és sima pont (pl. Cities) azonos háttér */
+body.app .navbar-sidebar .navbar__list > li.active > a {
   color: #ffffff !important;
   background-color: #6194c1;
+}
+
+body.app .navbar-sidebar .navbar__list > li.active > a > i {
+  color: #ffffff;
 }
 
 body.app .navbar-sidebar .navbar__list .navbar__sub-list li.active > a,

@@ -3,10 +3,15 @@
             <div class="container-fluid">
               <div class="header-wrap">
                 <button class="sidebar-toggle js-sidebar-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="main-sidebar"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
-                <form class="form-header<?= !empty($listSearch) ? ' form-header--has-clear' : '' ?>" role="search" method="get" action="<?= h($this->Url->build(['action' => 'index'])) ?>">
+<?php
+$isIndexAction = (($action ?? '') === 'index');
+$searchValue = (string)($listSearch ?? '');
+$searchAutofocus = $isIndexAction && $searchValue !== '';
+?>
+                <form class="form-header<?= $searchValue !== '' ? ' form-header--has-clear' : '' ?>" role="search" method="get" action="<?= h($this->Url->build(['action' => 'index'])) ?>">
                   <i class="fa-solid fa-magnifying-glass form-header__icon" aria-hidden="true"></i>
-                  <input class="au-input au-input--xl" type="search" name="search" value="<?= h($listSearch ?? '') ?>" placeholder="<?= h(__('Search anything…')) ?>" aria-label="<?= h(__('Search')) ?>">
-<?php if (!empty($listSearch)) :
+                  <input class="au-input au-input--xl" type="search" name="search" value="<?= h($searchValue) ?>" placeholder="<?= h(__('Search anything…')) ?>" aria-label="<?= h(__('Search')) ?>"<?= $searchAutofocus ? ' autofocus' : '' ?>>
+<?php if ($searchValue !== '') :
     $clearQuery = ['search' => ''];
     if (!empty($listSort)) {
         $clearQuery['sort'] = (string)$listSort;
