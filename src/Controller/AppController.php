@@ -4,7 +4,14 @@ declare(strict_types=1);
 namespace JeffAdmin\Controller;
 
 use App\Controller\AppController as BaseController;
+use Cake\Datasource\Paging\Exception\PageOutOfBoundsException;
+use Cake\Datasource\Paging\PaginatedInterface;
+use Cake\Datasource\QueryInterface;
+use Cake\Datasource\RepositoryInterface;
 use Cake\Event\EventInterface;
+use Cake\Http\Exception\NotFoundException;
+use Cake\Http\Exception\RedirectException;
+use Cake\Routing\Router;
 
 class AppController extends BaseController
 {
@@ -89,6 +96,43 @@ class AppController extends BaseController
     }
 
     /**
+     * Lapozás: ha a kért oldal a szűrés / trükközés miatt kívül esik,
+     * az 1. oldalra irányít (query + session page).
+     *
+     * @param \Cake\Datasource\RepositoryInterface|\Cake\Datasource\QueryInterface|string|null $object
+     * @param array<string, mixed> $settings
+     */
+    public function paginate(
+        RepositoryInterface|QueryInterface|string|null $object = null,
+        array $settings = [],
+    ): PaginatedInterface {
+        try {
+            return parent::paginate($object, $settings);
+        } catch (NotFoundException $e) {
+            if (!$e->getPrevious() instanceof PageOutOfBoundsException) {
+                throw $e;
+            }
+        } catch (PageOutOfBoundsException) {
+            // közvetlen kivétel (ha a parent nem csomagolná)
+        }
+
+        $query = $this->request->getQueryParams();
+        $query['page'] = 1;
+
+        $state = $this->defaultListState($this->getLastRecordState());
+        $state['page'] = 1;
+        $this->getRequest()->getSession()->write($this->lastRecordSessionKey(), $state);
+
+        throw new RedirectException(
+            Router::url([
+                'action' => 'index',
+                '?' => $query,
+            ], true),
+            302,
+        );
+    }
+
+    /**
      * Utoljára érintett rekord mentése sessionbe: id + lista oldal (+ megőrzött sort/search).
      * Kulcs: JeffAdmin.lastId.{Prefix.}{Controller}
      * Az érték addig megmarad, amíg új id-t nem írunk — soha nem töröljük.
@@ -131,7 +175,11 @@ class AppController extends BaseController
         }
 
         if (array_key_exists('search', $query)) {
-            $state['search'] = trim((string)$query['search']);
+            $newSearch = trim((string)$query['search']);
+            if ($newSearch !== (string)$state['search']) {
+                $state['page'] = 1;
+            }
+            $state['search'] = $newSearch;
             $changed = true;
         }
 

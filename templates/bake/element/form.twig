@@ -1,68 +1,163 @@
 {#
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
- * @since         2.0.0
- * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ * JeffAdmin bake — űrlap mezők (add / edit közös element).
+ * Típus szerinti input; pos: mindig spinner, lépés $show['posStep'] (alap 10).
  */
 #}
-{% set fields = Bake.filterFields(fields, schema, modelObject) %}
-<div class="row">
-    <aside class="column">
-        <div class="side-nav">
-            <h4 class="heading"><?= __('Actions') ?></h4>
-{% if 'add' not in action %}
-            <?= $this->Form->postLink(
-                __('Delete'),
-                ['action' => 'delete', ${{ singularVar }}->{{ primaryKey[0] }}],
-                ['confirm' => __('Are you sure you want to delete # {0}?', ${{ singularVar }}->{{ primaryKey[0] }}), 'class' => 'side-nav-item']
-            ) ?>
-{% endif %}
-            <?= $this->Html->link(__('List {{ pluralHumanName }}'), ['action' => 'index'], ['class' => 'side-nav-item']) ?>
-{% set done = [] %}
-        </div>
-    </aside>
-    <div class="column column-80">
-        <div class="{{ pluralVar }} form content">
-            <?= $this->Form->create(${{ singularVar }}) ?>
-            <fieldset>
-                <legend><?= __('{{ action|humanize }} {{ singularHumanName }}') ?></legend>
-                <?php
-{% for field in fields %}
-    {%~ if field not in primaryKey %}
-        {%~ if keyFields[field] is defined %}
-            {%~ set fieldData = Bake.columnData(field, schema) %}
-            {%~ if fieldData.null %}
-                    echo $this->Form->control('{{ field }}', ['options' => ${{ keyFields[field] }}, 'empty' => true]);
-            {%~ else %}
-                    echo $this->Form->control('{{ field }}', ['options' => ${{ keyFields[field] }}]);
-            {%~ endif %}
-        {%~ elseif field not in ['created', 'modified', 'updated'] %}
-            {%~ set fieldData = Bake.columnData(field, schema) %}
-            {%~ if fieldData.type in ['date', 'datetime', 'time'] and fieldData.null %}
-                    echo $this->Form->control('{{ field }}', ['empty' => true]);
-            {%~ else %}
-                    echo $this->Form->control('{{ field }}');
-            {%~ endif %}
+{%- set fields = Bake.filterFields(fields, schema, modelObject) -%}
+{%- set settingsFields = ['visible', 'pos'] -%}
+{%- set skipFields = primaryKey|merge(['created', 'modified', 'updated']) -%}
+{%- set currencyExact = ['price', 'amount', 'cost', 'total', 'fee', 'net', 'gross', 'money', 'sum', 'ar', 'osszeg', 'dij', 'netto', 'brutto', 'unit_price', 'unitprice', 'net_price', 'gross_price'] -%}
+{%- set basicFields = [] -%}
+{%- set hasSettings = false -%}
+{%- for field in fields -%}
+    {%- if field not in skipFields and not (field ends with '_count') -%}
+        {%- if field in settingsFields -%}
+            {%- set hasSettings = true -%}
+        {%- else -%}
+            {%- set basicFields = basicFields|merge([field]) -%}
+        {%- endif -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- if associations.BelongsToMany is defined -%}
+    {%- set hasBelongsToMany = true -%}
+{%- else -%}
+    {%- set hasBelongsToMany = false -%}
+{%- endif -%}
+                        <?php
+                        $containerLess = ['inputContainer' => '{{ '{{' }}content{{ '}}' }}'];
+                        ?>
+                        <div class="tab-pane fade show active" id="tab-basic" role="tabpanel" aria-labelledby="tab-basic-btn" tabindex="0">
+{% for field in basicFields %}
+    {%~ set fieldData = Bake.columnData(field, schema) %}
+    {%~ set fieldLower = field|lower %}
+    {%~ set isCurrency = fieldLower in currencyExact or fieldLower ends with '_price' or fieldLower ends with '_amount' or fieldLower ends with '_cost' or fieldLower ends with '_total' or fieldLower ends with '_fee' or fieldLower ends with '_money' or fieldLower ends with '_osszeg' or fieldLower ends with '_dij' %}
+    {%~ set isEmail = fieldLower == 'email' or 'email' in fieldLower %}
+    {%~ if keyFields[field] is defined %}
+        {%~ set assocLabel = field|humanize %}
+        {%~ if associations.BelongsTo is defined %}
+            {%~ for alias, details in associations.BelongsTo %}
+                {%~ if field == details.foreignKey %}
+                    {%~ set assocLabel = details.property|humanize %}
+                {%~ endif %}
+            {%~ endfor %}
         {%~ endif %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ assocLabel }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <div class="select-with-action">
+                                <?= $this->Form->control('{{ field }}', ['label' => false, 'options' => ${{ keyFields[field] }}, 'empty' => __('Please select'), 'class' => 'form-select', 'data-tom-select' => true, 'templates' => $containerLess]) ?>
+                                <button type="button" class="btn btn-outline-secondary select-with-action__btn" aria-label="<?= h(__('More options')) ?>" data-bs-toggle="tooltip" data-bs-title="<?= h(__('More options')) ?>">
+                                  <?= $this->Icon->outline('dots') ?>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+    {%~ elseif fieldData.type == 'boolean' %}
+                          <div class="row mb-3 align-items-center">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold mb-0']) ?>
+                            </div>
+                            <div class="col-12 col-md-9 d-flex align-items-center flex-wrap pt-1">
+                              <div class="form-check form-check-inline mb-0">
+                                <?= $this->Form->checkbox('{{ field }}', ['class' => 'form-check-input', 'id' => '{{ field }}']) ?>
+                                <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}'), ['class' => 'form-check-label']) ?>
+                              </div>
+                            </div>
+                          </div>
+    {%~ elseif fieldData.type == 'text' %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Form->control('{{ field }}', ['label' => false, 'type' => 'textarea', 'rows' => 4, 'class' => 'form-control', 'templates' => $containerLess]) ?>
+                            </div>
+                          </div>
+    {%~ elseif fieldData.type in ['date', 'datetime', 'time', 'timestamp'] %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Form->control('{{ field }}', ['label' => false, 'class' => 'form-control', {% if fieldData.null %}'empty' => true, {% endif %}'templates' => $containerLess]) ?>
+                            </div>
+                          </div>
+    {%~ elseif isEmail %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Form->control('{{ field }}', ['label' => false, 'type' => 'email', 'class' => 'form-control', 'templates' => $containerLess]) ?>
+                            </div>
+                          </div>
+    {%~ elseif isCurrency or fieldData.type in ['decimal', 'float', 'integer', 'biginteger', 'smallinteger', 'tinyinteger'] %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Form->control('{{ field }}', ['label' => false, 'type' => 'text', 'class' => 'form-control', 'templates' => $containerLess]) ?>
+                            </div>
+                          </div>
+    {%~ else %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Form->control('{{ field }}', ['label' => false, 'class' => 'form-control',{% if loop.first %} 'autofocus' => true,{% endif %} 'templates' => $containerLess]) ?>
+                            </div>
+                          </div>
     {%~ endif %}
 {% endfor %}
 {% if associations.BelongsToMany is defined %}
     {%~ for assocName, assocData in associations.BelongsToMany %}
-                    echo $this->Form->control('{{ assocData.property }}._ids', ['options' => ${{ assocData.variable }}]);
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ assocData.property }}._ids', __('{{ assocName|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Form->control('{{ assocData.property }}._ids', ['label' => false, 'options' => ${{ assocData.variable }}, 'multiple' => true, 'class' => 'form-select', 'data-tom-select' => true, 'templates' => $containerLess]) ?>
+                            </div>
+                          </div>
     {%~ endfor %}
 {% endif %}
-                ?>
-            </fieldset>
-            <?= $this->Form->button(__('Submit')) ?>
-            <?= $this->Form->end() ?>
-        </div>
-    </div>
-</div>
+                        </div>
+
+{% if hasSettings or 'visible' in fields or 'pos' in fields %}
+                        <div class="tab-pane fade" id="tab-settings" role="tabpanel" aria-labelledby="tab-settings-btn" tabindex="0">
+                          <section class="form-section">
+                            <h5 class="form-section__title"><?= __('Record settings') ?></h5>
+{% if 'visible' in fields %}
+                            <div class="row mb-3 align-items-center">
+                              <div class="col-12 col-md-2 text-start text-md-end">
+                                <?= $this->Form->label('visible', __('Visible') . ':', ['class' => 'form-control-label fw-bold mb-0']) ?>
+                              </div>
+                              <div class="col-12 col-md-9 d-flex align-items-center flex-wrap pt-1">
+                                <div class="form-check form-check-inline mb-0">
+                                  <?= $this->Form->checkbox('visible', ['class' => 'form-check-input', 'id' => 'visible']) ?>
+                                  <?= $this->Form->label('visible', __('Visible'), ['class' => 'form-check-label']) ?>
+                                </div>
+                              </div>
+                            </div>
+{% endif %}
+{% if 'pos' in fields %}
+                            <?php
+                            $posStep = max(1, (int)($show['posStep'] ?? 10));
+                            ?>
+                            <div class="row mb-3">
+                              <div class="col-12 col-md-2 text-start text-md-end">
+                                <?= $this->Form->label('pos', __('Pos') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                              </div>
+                              <div class="col-12 col-md-9">
+                                <?= $this->Form->control('pos', ['label' => false, 'type' => 'text', 'class' => 'form-control', 'data-number-spinner' => true, 'data-integer' => '1', 'inputmode' => 'numeric', 'min' => '0', 'step' => (string)$posStep, 'autocomplete' => 'off', 'placeholder' => '0', 'templates' => $containerLess]) ?>
+                              </div>
+                            </div>
+{% endif %}
+                          </section>
+                        </div>
+{% endif %}

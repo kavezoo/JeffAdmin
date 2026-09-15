@@ -1,0 +1,26 @@
+{
+    "name": "jeff/jeff-admin",
+    "description": "JeffAdmin — CakePHP 5 admin UI plugin (layout, helpers, bake theme)",
+    "type": "cakephp-plugin",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.1",
+        "cakephp/cakephp": "^5.0"
+    },
+    "suggest": {
+        "cakephp/bake": "Required to bake controllers/templates with the JeffAdmin theme"
+    },
+    "autoload": {
+        "psr-4": {
+            "JeffAdmin\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JeffAdmin\\Test\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

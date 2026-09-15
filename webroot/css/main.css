@@ -297,10 +297,27 @@ body.app .table-data2.table td.pos {
 	font-variant-numeric: tabular-nums;
 }
 
-body.app .table-data2.table td.number .currency {
+body.app .table-data2.table th.currency,
+body.app .table-data2.table td.currency {
+	text-align: right;
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+}
+
+body.app .table-data2.table td.number .currency,
+body.app .table-data2.table td.currency .currency {
 	margin-left: 0.25em;
 	font-weight: 400;
 	color: #6b7280;
+}
+
+body.app .table-data2.table .boolean-icon.fa-check {
+	font-weight: 900;
+}
+
+body.app .table-data2.table .boolean-icon.fa-square {
+	font-weight: 400;
+	opacity: 0.85;
 }
 
 /* Boolean / visible — eye icon */
@@ -430,9 +447,35 @@ body.app .table-data-feature .item.delete:hover {
   border-color: var(--m-danger);
 }
 
-/* Record link — thin stroke icon, faint until hover */
+/* Record link — szülő rekord; szöveg + link-chain jobbra, hoverre fekete ikon */
 body.app .record-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
   color: #1f2937;
+  max-width: 100%;
+}
+
+body.app .record-link .record-link__icon {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  flex-shrink: 0;
+  margin-left: 0;
+  vertical-align: -0.1em;
+  color: #9aa0a6;
+  opacity: 0.45;
+  transition: color 120ms ease, opacity 120ms ease;
+}
+
+body.app .record-link:hover {
+  color: #111827;
+}
+
+body.app .record-link:hover .record-link__icon,
+body.app .record-link:focus-visible .record-link__icon {
+  color: #000;
+  opacity: 1;
 }
 
 /* Lista-lapozó — kicsi, semleges, a szürke card-footerhöz */
@@ -506,26 +549,6 @@ body.app .card-footer .pagination .ja-page-icon {
   height: 14px;
   display: block;
   flex: 0 0 14px;
-}
-
-body.app .record-link .record-link__icon {
-  display: inline-block;
-  width: 0.9em;
-  height: 0.9em;
-  margin-left: 0.35em;
-  vertical-align: -0.1em;
-  color: #888;
-  opacity: 0.9;
-  transition: color 120ms ease, opacity 120ms ease;
-}
-
-body.app .record-link:hover {
-  color: #111827;
-}
-
-body.app .record-link:hover .record-link__icon {
-  color: #555;
-  opacity: 1;
 }
 
 /* ----------------------------------------------------------------------------
@@ -1152,4 +1175,48 @@ body.app .form-wysiwyg .tox-editor-header {
 
 body.app .form-wysiwyg .tox-statusbar {
   border-top: 1px solid var(--m-border, #e4e7ec) !important;
+}
+
+/* Header kereső — aktív szűrő törlése (X) */
+body.app .form-header--has-clear .au-input {
+  padding-right: 72px;
+}
+
+body.app .form-header__clear {
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  color: #9aa0a6;
+  text-decoration: none;
+  z-index: 2;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+body.app .form-header__clear:hover,
+body.app .form-header__clear:focus-visible {
+  color: #000;
+  background: rgba(0, 0, 0, 0.06);
+  outline: none;
+}
+
+body.app .form-header__clear-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+body.app .form-header--has-clear:focus-within .form-header__hint {
+  opacity: 0;
+}
+
+body.app .form-header .au-input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
 }

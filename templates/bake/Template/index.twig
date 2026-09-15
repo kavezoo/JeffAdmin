@@ -1,92 +1,373 @@
 {#
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * JeffAdmin bake — listanézet (index).
  *
- * Licensed under The MIT License
- * For full copyright and license information, please see the LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
- * @since         2.0.0
- * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ * Aktív oszlopok (config): id, name|title, visible, pos, created, modified, *_count
+ * Egyéb mezők: kikommentelve, uncommenttel bekapcsolhatók.
  */
 #}
+{%- set fields = Bake.filterFields(fields, schema, modelObject, indexColumns, ['binary', 'text']) -%}
+{%- set specialFields = ['id', 'visible', 'pos', 'created', 'modified'] -%}
+{%- set titleField = null -%}
+{%- if 'name' in fields -%}
+    {%- set titleField = 'name' -%}
+{%- elseif 'title' in fields -%}
+    {%- set titleField = 'title' -%}
+{%- endif -%}
+{%- set currencyExact = ['price', 'amount', 'cost', 'total', 'fee', 'net', 'gross', 'money', 'sum', 'ar', 'osszeg', 'dij', 'netto', 'brutto', 'unit_price', 'unitprice', 'net_price', 'gross_price'] -%}
+{%- set currencySuffixes = ['price', 'amount', 'cost', 'total', 'fee', 'money', 'osszeg', 'dij'] -%}
+{%- set otherFields = [] -%}
+{%- for field in fields -%}
+    {%- if field not in specialFields and field != titleField and not (field ends with '_count') -%}
+        {%- set otherFields = otherFields|merge([field]) -%}
+    {%- endif -%}
+{%- endfor -%}
 <?php
 /**
+ * Lista — megjelenítési kapcsolók ($show, plugin config + helyi felülírás)
+ * rowCheckbox, rowId, name, visible, pos, created, modified, counts,
+ * viewButton, editButton, deleteButton, rowDblClick
+ *
  * @var \{{ namespace }}\View\AppView $this
  * @var iterable<\{{ entityClass }}> ${{ pluralVar }}
+ * @var string|null $lastRecordId
+ * @var int|null $lastRecordPage
  */
+
+use Cake\Core\Configure;
+use Cake\Utility\Inflector;
+
+$show = Configure::read('JeffAdmin');
+$showLocal = [];
+
+$showLocal['index'] = [
+//    'rowCheckbox'     => false,
+//    'rowId'           => false,
+//    'name'            => false,
+//    'visible'         => false,
+//    'pos'             => false,
+//    'created'         => false,
+//    'modified'        => false,
+//    'counts'          => false,
+//    'viewButton'      => false,
+//    'editButton'      => false,
+//    'deleteButton'    => false,
+//    'rowDblClick'     => 'view',   // 'edit' | 'view' | 'none'
+];
+
+$show = array_merge($show['index'] ?? [], $showLocal['index']);
+
+$rowDblClick = $show['rowDblClick'] ?? 'edit';
+if (!in_array($rowDblClick, ['edit', 'view'], true)) {
+    $rowDblClick = 'none';
+}
+
+$listPage = max(1, (int)$this->request->getQuery('page', 1));
+
+$countColumns = [];
+if (!empty($show['counts'])) {
+    foreach (${{ pluralVar }} as ${{ singularVar }}) {
+        foreach (array_keys(${{ singularVar }}->toArray()) as $field) {
+            if (str_ends_with($field, '_count')) {
+                $countColumns[$field] = Inflector::humanize(substr($field, 0, -6)) . ' count';
+            }
+        }
+        break;
+    }
+}
+
+$tableAttrs = '';
+if (!empty($show['rowCheckbox'])) {
+    $tableAttrs .= ' data-table-select';
+}
+if ($rowDblClick !== 'none') {
+    $tableAttrs .= ' data-row-dblclick="' . h($rowDblClick) . '"';
+}
 ?>
-<div class="{{ pluralVar }} index content">
-{% set fields = Bake.filterFields(fields, schema, modelObject, indexColumns, ['binary', 'text']) %}
-    <?= $this->Html->link({% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'New {{ singularHumanName }}'), ['action' => 'add'], ['class' => 'button float-right']) ?>
-{% set done = [] %}
-    <h3><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'{{ pluralHumanName }}') ?></h3>
-    <div class="table-responsive">
-        <table>
-            <thead>
-                <tr>
-{% for field in fields %}
-                    <th><?= $this->Paginator->sort('{{ field }}') ?></th>
-{% endfor %}
-                    <th class="actions"><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Actions') ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach (${{ pluralVar }} as ${{ singularVar }}): ?>
-                <tr>
-{% for field in fields %}
+              <div class="row row-tight" style="margin-top: 16px;">
+                <div class="col-md-12">
+                  <div class="card shadow" aria-labelledby="{{ pluralVar }}-title">
+                    <div class="card-header border-bottom d-flex align-items-center justify-content-between">
+                      <div>
+                        <strong id="{{ pluralVar }}-title"><?= __('{{ pluralHumanName }}') ?></strong>
+                        <small class="d-block"><?= __('All {{ pluralHumanName|lower }}') ?></small>
+                      </div>
+                      <div class="table-data__tool-right">
+                        <?= $this->Html->link(
+                            $this->Icon->outline('plus') . ' ' . __('Add new {{ singularHumanName|lower }}'),
+                            ['action' => 'add'],
+                            ['class' => 'btn btn-success', 'escape' => false]
+                        ) ?>
+                      </div>
+                    </div>
+
+                    <div class="card-body p-0 pt-2">
+                      <div class="table-responsive text-nowrap">
+                        <table class="table table-data2 table-border table-hover table-striped table-custom-hover mb-0"<?= $tableAttrs ?>>
+                          <thead>
+                            <tr>
+<?php if (!empty($show['rowCheckbox'])) : ?>
+                              <th class="select-col">
+                                <label class="au-checkbox">
+                                  <input type="checkbox" data-select-all aria-label="<?= h(__('Select all')) ?>">
+                                  <span class="au-checkmark"></span>
+                                </label>
+                              </th>
+<?php endif; ?>
+{% if 'id' in fields %}
+<?php if (!empty($show['rowId'])) : ?>
+                              <th class="integer id-col"><?= $this->Paginator->sort('id') ?></th>
+<?php endif; ?>
+{% endif %}
+{% if titleField %}
+<?php if (!empty($show['name'])) : ?>
+                              <th class="string"><?= $this->Paginator->sort('{{ titleField }}') ?></th>
+<?php endif; ?>
+{% endif %}
+{% for field in otherFields %}
     {%~ set isKey = false %}
+    {%~ set assocDetails = null %}
     {%~ if associations.BelongsTo is defined %}
         {%~ for alias, details in associations.BelongsTo %}
             {%~ if field == details.foreignKey %}
                 {%~ set isKey = true %}
-                    <td><?= ${{ singularVar }}->hasValue('{{ details.property }}') ? $this->Html->link(${{ singularVar }}->{{ details.property }}->{{ details.displayField }}, ['controller' => '{{ details.controller }}', 'action' => 'view', ${{ singularVar }}->{{ details.property }}->{{ details.primaryKey[0] }}]) : '' ?></td>
+                {%~ set assocDetails = details %}
             {%~ endif %}
         {%~ endfor %}
     {%~ endif %}
-    {%~ if isKey is not same as(true) %}
-        {%~ set columnData = Bake.columnData(field, schema) %}
-        {%~ set supportsLabel = Bake.enumSupportsLabel(field, schema) %}
-        {%~ if columnData.type starts with 'enum-' %}
-                    <td><?= ${{ singularVar }}->{{ field }} === null ? '' : h(${{ singularVar }}->{{ field }}->{% if supportsLabel %}label(){% else %}value{% endif %}) ?></td>
-        {%~ elseif columnData.type not in ['integer', 'float', 'decimal', 'biginteger', 'smallinteger', 'tinyinteger'] %}
-                    <td><?= h(${{ singularVar }}->{{ field }}) ?></td>
-        {%~ elseif columnData.null %}
-                    <td><?= ${{ singularVar }}->{{ field }} === null ? '' : $this->Number->format(${{ singularVar }}->{{ field }}) ?></td>
-        {%~ else %}
-                    <td><?= $this->Number->format(${{ singularVar }}->{{ field }}) ?></td>
-        {%~ endif %}
+    {%~ set columnData = Bake.columnData(field, schema) %}
+    {%~ set fieldLower = field|lower %}
+    {%~ set isCurrency = fieldLower in currencyExact or fieldLower ends with '_price' or fieldLower ends with '_amount' or fieldLower ends with '_cost' or fieldLower ends with '_total' or fieldLower ends with '_fee' or fieldLower ends with '_money' or fieldLower ends with '_osszeg' or fieldLower ends with '_dij' %}
+    {%~ set isEmail = fieldLower == 'email' or 'email' in fieldLower %}
+    {%~ set cssClass = 'string' %}
+    {%~ if isKey %}
+        {%~ set cssClass = 'string' %}
+    {%~ elseif isEmail %}
+        {%~ set cssClass = 'email' %}
+    {%~ elseif isCurrency %}
+        {%~ set cssClass = 'number currency' %}
+    {%~ elseif columnData.type == 'boolean' %}
+        {%~ set cssClass = 'boolean' %}
+    {%~ elseif columnData.type in ['integer', 'biginteger', 'smallinteger', 'tinyinteger'] %}
+        {%~ set cssClass = 'integer' %}
+    {%~ elseif columnData.type in ['float', 'decimal'] %}
+        {%~ set cssClass = 'number' %}
+    {%~ elseif columnData.type == 'date' %}
+        {%~ set cssClass = 'date' %}
+    {%~ elseif columnData.type == 'time' %}
+        {%~ set cssClass = 'time' %}
+    {%~ elseif columnData.type in ['datetime', 'timestamp'] %}
+        {%~ set cssClass = 'datetime' %}
     {%~ endif %}
+<?php /*
+{% if isKey and assocDetails %}
+                              <th class="{{ cssClass }}"><?= $this->Paginator->sort('{{ field }}', __('{{ assocDetails.property|humanize }}')) ?></th>
+{% else %}
+                              <th class="{{ cssClass }}"><?= $this->Paginator->sort('{{ field }}') ?></th>
+{% endif %}
+*/ ?>
 {% endfor %}
+<?php if (!empty($show['counts'])) : ?>
+<?php     foreach ($countColumns as $countKey => $countLabel) : ?>
+                              <th class="count"><?= $this->Paginator->sort($countKey, $countLabel) ?></th>
+<?php     endforeach; ?>
+<?php endif; ?>
+{% if 'visible' in fields %}
+<?php if (!empty($show['visible'])) : ?>
+                              <th class="boolean"><?= $this->Paginator->sort('visible') ?></th>
+<?php endif; ?>
+{% endif %}
+{% if 'pos' in fields %}
+<?php if (!empty($show['pos'])) : ?>
+                              <th class="integer pos"><?= $this->Paginator->sort('pos') ?></th>
+<?php endif; ?>
+{% endif %}
+{% if 'created' in fields or 'modified' in fields %}
+<?php if (!empty($show['created']) || !empty($show['modified'])) : ?>
+                              <th class="datetime-meta">
+<?php     if (!empty($show['created'])) : ?>
+                                <?= $this->Paginator->sort('created') ?>
+<?php     endif; ?>
+<?php     if (!empty($show['created']) && !empty($show['modified'])) : ?>
+                                <br>
+<?php     endif; ?>
+<?php     if (!empty($show['modified'])) : ?>
+                                <?= $this->Paginator->sort('modified') ?>
+<?php     endif; ?>
+                              </th>
+<?php endif; ?>
+{% endif %}
+<?php if (!empty($show['viewButton']) || !empty($show['editButton']) || !empty($show['deleteButton'])) : ?>
+                              <th class="action"><?= __('Actions') ?></th>
+<?php endif; ?>
+                            </tr>
+                          </thead>
+                          <tbody class="table-group-divider">
+<?php foreach (${{ pluralVar }} as ${{ singularVar }}) :
+    $dblClickUrl = $rowDblClick === 'none'
+        ? null
+        : $this->Url->build([
+            'action' => $rowDblClick,
+            ${{ singularVar }}->{{ primaryKey[0] }},
+            '?' => ['listPage' => $listPage],
+        ]);
+    $rowClass = (isset($lastRecordId) && (string)$lastRecordId === (string)${{ singularVar }}->{{ primaryKey[0] }})
+        ? ' is-last-touched'
+        : '';
+    $rowAttrs = ' data-id="' . h((string)${{ singularVar }}->{{ primaryKey[0] }}) . '"'
+        . ' id="row-' . h((string)${{ singularVar }}->{{ primaryKey[0] }}) . '"';
+    if ($dblClickUrl) {
+        $rowAttrs .= ' data-dblclick-url="' . h($dblClickUrl) . '"';
+    }
+    if ($rowClass !== '') {
+        $rowAttrs .= ' class="' . trim($rowClass) . '"';
+    }
+?>
+                            <tr<?= $rowAttrs ?>>
+<?php if (!empty($show['rowCheckbox'])) : ?>
+                              <td class="select-col">
+                                <label class="au-checkbox">
+                                  <input type="checkbox" data-select-row value="<?= h((string)${{ singularVar }}->{{ primaryKey[0] }}) ?>" aria-label="<?= h(__('Select row')) ?>">
+                                  <span class="au-checkmark"></span>
+                                </label>
+                              </td>
+<?php endif; ?>
+{% if 'id' in fields %}
+<?php if (!empty($show['rowId'])) : ?>
+                              <td class="integer id-col"><?= h((string)${{ singularVar }}->id) ?></td>
+<?php endif; ?>
+{% endif %}
+{% if titleField %}
+<?php if (!empty($show['name'])) : ?>
+                              <td class="string"><?= h(${{ singularVar }}->{{ titleField }}) ?></td>
+<?php endif; ?>
+{% endif %}
+{% for field in otherFields %}
+    {%~ set isKey = false %}
+    {%~ set assocDetails = null %}
+    {%~ if associations.BelongsTo is defined %}
+        {%~ for alias, details in associations.BelongsTo %}
+            {%~ if field == details.foreignKey %}
+                {%~ set isKey = true %}
+                {%~ set assocDetails = details %}
+            {%~ endif %}
+        {%~ endfor %}
+    {%~ endif %}
+    {%~ set columnData = Bake.columnData(field, schema) %}
+    {%~ set fieldLower = field|lower %}
+    {%~ set isCurrency = fieldLower in currencyExact or fieldLower ends with '_price' or fieldLower ends with '_amount' or fieldLower ends with '_cost' or fieldLower ends with '_total' or fieldLower ends with '_fee' or fieldLower ends with '_money' or fieldLower ends with '_osszeg' or fieldLower ends with '_dij' %}
+    {%~ set isEmail = fieldLower == 'email' or 'email' in fieldLower %}
+    {%~ set cssClass = 'string' %}
+    {%~ if isKey %}
+        {%~ set cssClass = 'string' %}
+    {%~ elseif isEmail %}
+        {%~ set cssClass = 'email' %}
+    {%~ elseif isCurrency %}
+        {%~ set cssClass = 'number currency' %}
+    {%~ elseif columnData.type == 'boolean' %}
+        {%~ set cssClass = 'boolean' %}
+    {%~ elseif columnData.type in ['integer', 'biginteger', 'smallinteger', 'tinyinteger'] %}
+        {%~ set cssClass = 'integer' %}
+    {%~ elseif columnData.type in ['float', 'decimal'] %}
+        {%~ set cssClass = 'number' %}
+    {%~ elseif columnData.type == 'date' %}
+        {%~ set cssClass = 'date' %}
+    {%~ elseif columnData.type == 'time' %}
+        {%~ set cssClass = 'time' %}
+    {%~ elseif columnData.type in ['datetime', 'timestamp'] %}
+        {%~ set cssClass = 'datetime' %}
+    {%~ endif %}
+<?php /*
+{% if isKey and assocDetails %}
+                              <td class="{{ cssClass }}">
+                                <?= ${{ singularVar }}->hasValue('{{ assocDetails.property }}')
+                                    ? $this->Html->link(
+                                        h((string)${{ singularVar }}->{{ assocDetails.property }}->{{ assocDetails.displayField }})
+                                            . $this->Icon->outline('link-chain', 'record-link__icon'),
+                                        ['controller' => '{{ assocDetails.controller }}', 'action' => 'view', ${{ singularVar }}->{{ assocDetails.property }}->{{ assocDetails.primaryKey[0] }}],
+                                        [
+                                            'class' => 'text-decoration-none text-dark fw-bold record-link',
+                                            'escape' => false,
+                                            'data-bs-toggle' => 'tooltip',
+                                            'data-bs-title' => __('View {0}: {1}', __('{{ assocDetails.property|humanize }}'), (string)${{ singularVar }}->{{ assocDetails.property }}->{{ assocDetails.displayField }}),
+                                        ]
+                                    )
+                                    : '' ?>
+                              </td>
+{% elseif isEmail %}
+                              <td class="{{ cssClass }}"><?= ${{ singularVar }}->{{ field }} === null || ${{ singularVar }}->{{ field }} === '' ? '' : $this->Html->link(h(${{ singularVar }}->{{ field }}), 'mailto:' . ${{ singularVar }}->{{ field }}, ['class' => 'text-decoration-none']) ?></td>
+{% elseif isCurrency %}
+                              <td class="{{ cssClass }}"><?= ${{ singularVar }}->{{ field }} === null ? '' : $this->Format->money(${{ singularVar }}->{{ field }}) ?></td>
+{% elseif columnData.type == 'boolean' %}
+                              <td class="{{ cssClass }}"><?= $this->Icon->boolean(${{ singularVar }}->{{ field }}) ?></td>
+{% elseif columnData.type starts with 'enum-' %}
+                              <td class="{{ cssClass }}"><?= ${{ singularVar }}->{{ field }} === null ? '' : h(${{ singularVar }}->{{ field }}->value) ?></td>
+{% elseif columnData.type in ['integer', 'biginteger', 'smallinteger', 'tinyinteger', 'float', 'decimal'] %}
+                              <td class="{{ cssClass }}"><?= ${{ singularVar }}->{{ field }} === null ? '' : $this->Number->format(${{ singularVar }}->{{ field }}) ?></td>
+{% else %}
+                              <td class="{{ cssClass }}"><?= h(${{ singularVar }}->{{ field }}) ?></td>
+{% endif %}
+*/ ?>
+{% endfor %}
+<?php if (!empty($show['counts'])) : ?>
+<?php     foreach ($countColumns as $countKey => $countLabel) :
+        $countVal = ${{ singularVar }}->get($countKey) ?? 0;
+        $countIsZero = ((float)$countVal) == 0.0;
+?>
+                              <td class="count<?= $countIsZero ? ' count--zero' : '' ?>"><?= h((string)$countVal) ?></td>
+<?php     endforeach; ?>
+<?php endif; ?>
+{% if 'visible' in fields %}
+<?php if (!empty($show['visible'])) : ?>
+                              <td class="boolean visible"><?= $this->Icon->boolean(${{ singularVar }}->visible) ?></td>
+<?php endif; ?>
+{% endif %}
+{% if 'pos' in fields %}
+<?php if (!empty($show['pos'])) : ?>
+                              <td class="integer pos"><?= ${{ singularVar }}->pos === null ? '' : h((string)${{ singularVar }}->pos) ?></td>
+<?php endif; ?>
+{% endif %}
+{% if 'created' in fields or 'modified' in fields %}
+<?php if (!empty($show['created']) || !empty($show['modified'])) : ?>
+                              <td class="datetime created-modified">
+<?php     if (!empty($show['created'])) : ?>
+                                <span class="created"><?= h(${{ singularVar }}->created) ?></span>
+<?php     endif; ?>
+<?php     if (!empty($show['created']) && !empty($show['modified'])) : ?>
+                                <br>
+<?php     endif; ?>
+<?php     if (!empty($show['modified'])) : ?>
+                                <span class="modified"><?= h(${{ singularVar }}->modified) ?></span>
+<?php     endif; ?>
+                              </td>
+<?php endif; ?>
+{% endif %}
 {% set pk = '$' ~ singularVar ~ '->' ~ primaryKey[0] %}
-                    <td class="actions">
-                        <?= $this->Html->link({% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'View'), ['action' => 'view', {{ pk|raw }}]) ?>
-                        <?= $this->Html->link({% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Edit'), ['action' => 'edit', {{ pk|raw }}]) ?>
-                        <?= $this->Form->postLink(
-                            {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Delete'),
-                            ['action' => 'delete', {{ pk|raw }}],
-                            [
-                                'method' => 'delete',
-                                'confirm' => {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Are you sure you want to delete # {0}?', {{ pk|raw }}),
-                            ]
-                        ) ?>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-    <div class="paginator">
-        <ul class="pagination">
-            <?= $this->Paginator->first('<< ' . {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'first')) ?>
-            <?= $this->Paginator->prev('< ' . {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'previous')) ?>
-            <?= $this->Paginator->numbers() ?>
-            <?= $this->Paginator->next({% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'next') . ' >') ?>
-            <?= $this->Paginator->last({% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'last') . ' >>') ?>
-        </ul>
-        <p><?= $this->Paginator->counter({% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Page {{ '{{' }}page{{ '}}' }} of {{ '{{' }}pages{{ '}}' }}, showing {{ '{{' }}current{{ '}}' }} record(s) out of {{ '{{' }}count{{ '}}' }} total')) ?></p>
-    </div>
-</div>
+<?php if (!empty($show['viewButton']) || !empty($show['editButton']) || !empty($show['deleteButton'])) : ?>
+                              <td class="action">
+                                <div class="table-data-feature">
+<?php     if (!empty($show['viewButton'])) : ?>
+                                  <?= $this->Action->view({{ pk|raw }}) ?>
+<?php     endif; ?>
+<?php     if (!empty($show['editButton'])) : ?>
+                                  <?= $this->Action->edit({{ pk|raw }}) ?>
+<?php     endif; ?>
+<?php     if (!empty($show['deleteButton'])) : ?>
+                                  <?= $this->Action->delete({{ pk|raw }}) ?>
+<?php     endif; ?>
+                                </div>
+                              </td>
+<?php endif; ?>
+                            </tr>
+<?php endforeach; ?>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div class="card-footer border-top d-flex align-items-center justify-content-between">
+                      <?= $this->element('JeffAdmin.pagination') ?>
+                    </div>
+                  </div>
+                </div>
+              </div>

@@ -1,18 +1,16 @@
 {#
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
- * @since         2.0.0
- * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ * JeffAdmin — Controller index (aktív header kereső + session).
  */
 #}
+{%- set belongsTo = Bake.aliasExtractor(modelObj, 'BelongsTo') -%}
+{%- set pk = modelObj.getPrimaryKey() -%}
+{%- if pk is iterable -%}
+    {%- set pkField = pk[0] -%}
+{%- else -%}
+    {%- set pkField = pk -%}
+{%- endif -%}
+{%- set tableSchema = modelObj.getSchema() %}
     /**
      * Index method
      *
@@ -20,7 +18,6 @@
      */
     public function index()
     {
-{% set belongsTo = Bake.aliasExtractor(modelObj, 'BelongsTo') %}
 {% if belongsTo %}
         $query = $this->{{ currentModelName }}->find()
             ->contain({{ Bake.exportArray(belongsTo)|raw }});
@@ -30,6 +27,35 @@
 {% if Bake.hasPlugin('Authorization') %}
         $query = $this->Authorization->applyScope($query);
 {% endif %}
+
+        // Header kereső (?search=) — sessionből a JeffAdmin AppController állítja vissza.
+        $search = trim((string)$this->request->getQuery('search', ''));
+        if ($search !== '') {
+            $parts = preg_split('/\s+/u', $search, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            $like = '%' . implode('%', $parts) . '%';
+
+            $query
+{% if belongsTo %}
+                ->leftJoinWith({{ Bake.exportArray(belongsTo)|raw }})
+{% endif %}
+                ->where([
+                    'OR' => [
+{% for column in tableSchema.columns() %}
+    {%~ set colType = tableSchema.getColumnType(column) %}
+    {%~ if colType in ['string', 'text'] and column != pkField %}
+                        '{{ currentModelName }}.{{ column }} LIKE' => $like,
+    {%~ endif %}
+{% endfor %}
+{% for assoc in belongsTo %}
+    {%~ set assocObj = modelObj.getAssociation(assoc) %}
+    {%~ set assocDisplay = assocObj.getDisplayField() %}
+                        '{{ assoc }}.{{ assocDisplay }} LIKE' => $like,
+{% endfor %}
+                    ],
+                ])
+                ->distinct(['{{ currentModelName }}.{{ pkField }}']);
+        }
+
         ${{ pluralName }} = $this->paginate($query);
 
         $this->set(compact('{{ pluralName }}'));

@@ -3,9 +3,24 @@
             <div class="container-fluid">
               <div class="header-wrap">
                 <button class="sidebar-toggle js-sidebar-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="main-sidebar"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
-                <form class="form-header" role="search" method="get" action="<?= h($this->Url->build(['action' => 'index'])) ?>">
+                <form class="form-header<?= !empty($listSearch) ? ' form-header--has-clear' : '' ?>" role="search" method="get" action="<?= h($this->Url->build(['action' => 'index'])) ?>">
                   <i class="fa-solid fa-magnifying-glass form-header__icon" aria-hidden="true"></i>
                   <input class="au-input au-input--xl" type="search" name="search" value="<?= h($listSearch ?? '') ?>" placeholder="<?= h(__('Search anything…')) ?>" aria-label="<?= h(__('Search')) ?>">
+<?php if (!empty($listSearch)) :
+    $clearQuery = ['search' => ''];
+    if (!empty($listSort)) {
+        $clearQuery['sort'] = (string)$listSort;
+        $clearQuery['direction'] = (string)($listDirection ?? 'asc');
+    }
+?>
+                  <a class="form-header__clear"
+                     href="<?= h($this->Url->build(['action' => 'index', '?' => $clearQuery])) ?>"
+                     data-bs-toggle="tooltip"
+                     data-bs-title="<?= h(__('Clear the active search filter')) ?>"
+                     aria-label="<?= h(__('Clear the active search filter')) ?>">
+                    <?= $this->Icon->outline('x', 'form-header__clear-icon') ?>
+                  </a>
+<?php endif; ?>
 <?php if (!empty($listSort)) : ?>
                   <input type="hidden" name="sort" value="<?= h((string)$listSort) ?>">
                   <input type="hidden" name="direction" value="<?= h((string)($listDirection ?? 'asc')) ?>">

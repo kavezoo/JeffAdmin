@@ -1,22 +1,14 @@
 {#
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
- * @since         2.0.0
- * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ * JeffAdmin — Controller view (rememberLastRecord + BelongsTo listák).
  */
 #}
 {% set allAssociations = Bake.aliasExtractor(modelObj, 'BelongsTo') %}
 {% set allAssociations = allAssociations|merge(Bake.aliasExtractor(modelObj, 'BelongsToMany')) %}
 {% set allAssociations = allAssociations|merge(Bake.aliasExtractor(modelObj, 'HasOne')) %}
 {% set allAssociations = allAssociations|merge(Bake.aliasExtractor(modelObj, 'HasMany')) %}
+{% set belongsTo = Bake.aliasExtractor(modelObj, 'BelongsTo') %}
+{% set compact = ["'#{singularName}'"] %}
     /**
      * View method
      *
@@ -26,9 +18,22 @@
      */
     public function view($id = null)
     {
+        $this->rememberLastRecord($id);
+
         ${{ singularName }} = $this->{{ currentModelName }}->get($id, contain: {{ Bake.exportArray(allAssociations)|raw }});
+        //dd($id);
+        //dd(${{ singularName }}->toArray());
 {% if Bake.hasPlugin('Authorization') %}
         $this->Authorization->authorize(${{ singularName }});
 {% endif %}
-        $this->set(compact('{{ singularName }}'));
+{% for assoc in belongsTo %}
+    {%~ set otherName = Bake.getAssociatedTableAlias(modelObj, assoc) %}
+    {%~ set otherPlural = otherName|variable %}
+    {%~ if otherPlural == singularName %}
+        {%~ set otherPlural = otherPlural ~ 'List' %}
+    {%~ endif %}
+        ${{ otherPlural }} = $this->{{ currentModelName }}->{{ otherName }}->find('list', limit: 200)->all();
+    {%~ set compact = compact|merge(["'#{otherPlural}'"]) %}
+{% endfor %}
+        $this->set(compact({{ compact|join(', ')|raw }}));
     }

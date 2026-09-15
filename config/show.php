@@ -26,7 +26,9 @@ return [
 			'rowCheckbox' 	=> true,
 			// Rekord azonosító (id) oszlop.
 			'rowId' 		=> true,
-			// Láthatóság (visible) oszlop: szem / áthúzott szem ikon.
+			// Név / title oszlop (bake: name, ha nincs: title).
+			'name' 			=> true,
+			// Láthatóság (visible) oszlop: boolean pipa / üres négyzet (vagy Icon->visible).
 			'visible' 		=> true,
 			// Sorrend / pozíció (pos) oszlop.
 			'pos' 			=> true,
@@ -52,6 +54,8 @@ return [
 			'saveButton' 	=> true,
 			// Mégse: visszalépés a listára, mentés nélkül.
 			'cancelButton' 	=> true,
+			// pos mező number spinner lépésköze (alap: 10).
+			'posStep' 		=> 10,
 		],
 
 		// --- add: új rekord űrlap lábléc gombjai ---
@@ -60,6 +64,8 @@ return [
 			'saveButton' 	=> true,
 			// Mégse: visszalépés a listára, mentés nélkül.
 			'cancelButton' 	=> true,
+			// pos mező number spinner lépésköze (alap: 10).
+			'posStep' 		=> 10,
 		],
 
 		// --- view: részletes nézet gombjai és kapcsolódó táblák ---
@@ -70,6 +76,8 @@ return [
 			'cancelButton' 	=> true,
 			// Kapcsolódó táblák (hasMany / belongsToMany) listája a rekord alatt.
 			'relatedTables'	=> true,
+			// pos mező number spinner lépésköze (disabled mezőn is, alap: 10).
+			'posStep' 		=> 10,
 		],
 	],
 ];

@@ -1,166 +1,347 @@
 {#
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
- * @since         2.0.0
- * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ * JeffAdmin bake — View sablon (egy fájl, disabled űrlap + related).
  */
 #}
+{% set fields = Bake.filterFields(fields, schema, modelObject) %}
+{% set settingsFields = ['visible', 'pos'] %}
+{% set skipFields = primaryKey|merge(['created', 'modified', 'updated']) %}
+{% set currencyExact = ['price', 'amount', 'cost', 'total', 'fee', 'net', 'gross', 'money', 'sum', 'ar', 'osszeg', 'dij', 'netto', 'brutto', 'unit_price', 'unitprice', 'net_price', 'gross_price'] %}
+{% set basicFields = [] %}
+{% for field in fields %}
+    {% if field not in skipFields and field not in settingsFields and not (field ends with '_count') %}
+        {% set basicFields = basicFields|merge([field]) %}
+    {% endif %}
+{% endfor %}
+{% set hasSettings = ('visible' in fields) or ('pos' in fields) %}
+{% set associations = {'BelongsTo': [], 'HasOne': [], 'HasMany': [], 'BelongsToMany': []}|merge(associations) %}
+{% set pK = '$' ~ singularVar ~ '->' ~ primaryKey[0] %}
 <?php
 /**
  * @var \{{ namespace }}\View\AppView $this
  * @var \{{ entityClass }} ${{ singularVar }}
+{% if associations.BelongsTo is defined %}
+    {%~ for assocName, assocData in associations.BelongsTo %}
+ * @var \Cake\Collection\CollectionInterface|string[] ${{ assocData.variable }}
+    {%~ endfor %}
+{% endif %}
  */
+
+use Cake\Core\Configure;
+
+$show = Configure::read('JeffAdmin');
+$showLocal = [];
+
+$showLocal['view'] = [
+//    'editButton'      => false,
+//    'cancelButton'    => false,
+//    'relatedTables'   => false,
+//    'posStep'         => 5,   // pos spinner lépés (alap: 10)
+];
+
+$show = array_merge($show['view'] ?? [], $showLocal['view']);
+$relatedShow = array_merge(Configure::read('JeffAdmin.index') ?? [], []);
+$containerLess = ['inputContainer' => '{{ '{{' }}content{{ '}}' }}'];
 ?>
-{% set associations = {'BelongsTo': [], 'HasOne': [], 'HasMany': [], 'BelongsToMany': []}|merge(associations) %}
-{% set fieldsData = Bake.getViewFieldsData(fields, schema, associations) %}
-{% set associationFields = fieldsData.associationFields %}
-{% set groupedFields = fieldsData.groupedFields %}
-{% set pK = '$' ~ singularVar ~ '->' ~ primaryKey[0] %}
-{% set done = [] %}
-<div class="row">
-    <aside class="column">
-        <div class="side-nav">
-            <h4 class="heading"><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Actions') ?></h4>
-            <?= $this->Html->link({% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Edit {{ singularHumanName }}'), ['action' => 'edit', {{ pK|raw }}], ['class' => 'side-nav-item']) ?>
-            <?= $this->Form->postLink({% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Delete {{ singularHumanName }}'), ['action' => 'delete', {{ pK|raw }}], ['confirm' => {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Are you sure you want to delete # {0}?', {{ pK|raw }}), 'class' => 'side-nav-item']) ?>
-            <?= $this->Html->link({% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'List {{ pluralHumanName }}'), ['action' => 'index'], ['class' => 'side-nav-item']) ?>
-            <?= $this->Html->link({% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'New {{ singularHumanName }}'), ['action' => 'add'], ['class' => 'side-nav-item']) ?>
-{% set done = [] %}
-        </div>
-    </aside>
-    <div class="column column-80">
-        <div class="{{ pluralVar }} view content">
-            <h3><?= h(${{ singularVar }}->{{ displayField }}) ?></h3>
-            <table>
-{% if groupedFields['string'] %}
-    {%~ for field in groupedFields['string'] %}
-        {%~ if associationFields[field] is defined %}
-            {%~ set details = associationFields[field] %}
-                <tr>
-                    <th><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'{{ details.property|humanize }}') ?></th>
-                    <td><?= ${{ singularVar }}->hasValue('{{ details.property }}') ? $this->Html->link(${{ singularVar }}->{{ details.property }}->{{ details.displayField }}, ['controller' => '{{ details.controller }}', 'action' => 'view', ${{ singularVar }}->{{ details.property }}->{{ details.primaryKey[0] }}]) : '' ?></td>
-                </tr>
-        {%~ else %}
-                <tr>
-                    <th><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'{{ field|humanize }}') ?></th>
-                    <td><?= h(${{ singularVar }}->{{ field }}) ?></td>
-                </tr>
-        {%~ endif %}
-    {%~ endfor %}
+              <div class="row row-tight" style="margin-top: 16px;">
+                <div class="col-12 col-xxl-11">
+                  <?= $this->Form->create(${{ singularVar }}, [
+                      'class' => 'form-horizontal',
+                      'id' => '{{ singularVar }}-view-form',
+                      'onsubmit' => 'return false;',
+                  ]) ?>
+                  <div class="card shadow" aria-labelledby="{{ singularVar }}-form-title">
+                    <div class="card-header form-card-header">
+                      <div class="form-card-header__title">
+                        <strong id="{{ singularVar }}-form-title"><?= __('View {{ singularHumanName }}') ?></strong>
+                        <small class="d-block"><?= h(${{ singularVar }}->{{ displayField }}) ?></small>
+                      </div>
+
+                      <ul class="nav nav-tabs card-header-tabs form-card-header__tabs" id="formTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                          <a class="nav-link active" id="tab-basic-btn" data-bs-toggle="tab" href="#tab-basic" role="tab" aria-controls="tab-basic" aria-current="page" aria-selected="true"><?= __('Basic data') ?></a>
+                        </li>
+{% if hasSettings %}
+                        <li class="nav-item ms-auto" role="presentation">
+                          <a class="nav-link" id="tab-settings-btn" data-bs-toggle="tab" href="#tab-settings" role="tab" aria-controls="tab-settings" aria-selected="false"><?= __('Settings') ?></a>
+                        </li>
 {% endif %}
-{% if associations.HasOne %}
-    {%~ for alias, details in associations.HasOne %}
-                <tr>
-                    <th><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'{{ alias|underscore|singularize|humanize }}') ?></th>
-                    <td><?= ${{ singularVar }}->hasValue('{{ details.property }}') ? $this->Html->link(${{ singularVar }}->{{ details.property }}->{{ details.displayField }}, ['controller' => '{{ details.controller }}', 'action' => 'view', ${{ singularVar }}->{{ details.property }}->{{ details.primaryKey[0] }}]) : '' ?></td>
-                </tr>
-    {%~ endfor %}
+                      </ul>
+
+                      <?= $this->Action->close({{ pK|raw }}) ?>
+                    </div>
+
+                    <div class="card-body form-card-body">
+                      <div class="tab-content">
+
+                        <div class="tab-pane fade show active" id="tab-basic" role="tabpanel" aria-labelledby="tab-basic-btn" tabindex="0">
+{% for field in basicFields %}
+    {%~ set fieldData = Bake.columnData(field, schema) %}
+    {%~ set fieldLower = field|lower %}
+    {%~ set isCurrency = fieldLower in currencyExact or fieldLower ends with '_price' or fieldLower ends with '_amount' or fieldLower ends with '_cost' or fieldLower ends with '_total' or fieldLower ends with '_fee' or fieldLower ends with '_money' or fieldLower ends with '_osszeg' or fieldLower ends with '_dij' %}
+    {%~ set isEmail = fieldLower == 'email' or 'email' in fieldLower %}
+    {%~ if keyFields[field] is defined %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <div class="select-with-action">
+                                <?= $this->Form->control('{{ field }}', ['label' => false, 'options' => ${{ keyFields[field] }}, {% if fieldData.null %}'empty' => __('Please select'), {% endif %}'class' => 'form-select', 'data-tom-select' => true, 'disabled' => true, 'templates' => $containerLess]) ?>
+                                <button type="button" class="btn btn-outline-secondary select-with-action__btn" disabled aria-label="<?= h(__('More options')) ?>" data-bs-toggle="tooltip" data-bs-title="<?= h(__('More options')) ?>">
+                                  <?= $this->Icon->outline('dots') ?>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+    {%~ elseif fieldData.type == 'boolean' %}
+                          <div class="row mb-3 align-items-center">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold mb-0']) ?>
+                            </div>
+                            <div class="col-12 col-md-9 d-flex align-items-center flex-wrap pt-1">
+                              <div class="form-check form-check-inline mb-0">
+                                <?= $this->Form->checkbox('{{ field }}', ['class' => 'form-check-input', 'id' => '{{ field }}', 'disabled' => true]) ?>
+                                <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}'), ['class' => 'form-check-label']) ?>
+                              </div>
+                            </div>
+                          </div>
+    {%~ elseif fieldData.type == 'text' %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Form->control('{{ field }}', ['label' => false, 'type' => 'textarea', 'rows' => 4, 'class' => 'form-control', 'disabled' => true, 'templates' => $containerLess]) ?>
+                            </div>
+                          </div>
+    {%~ elseif isEmail %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Form->control('{{ field }}', ['label' => false, 'type' => 'email', 'class' => 'form-control', 'disabled' => true, 'templates' => $containerLess]) ?>
+                            </div>
+                          </div>
+    {%~ elseif isCurrency or fieldData.type in ['decimal', 'float', 'integer', 'biginteger', 'smallinteger', 'tinyinteger'] %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Form->control('{{ field }}', ['label' => false, 'type' => 'text', 'class' => 'form-control', 'disabled' => true, 'templates' => $containerLess]) ?>
+                            </div>
+                          </div>
+    {%~ else %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Form->control('{{ field }}', ['label' => false, 'class' => 'form-control', 'disabled' => true, 'templates' => $containerLess]) ?>
+                            </div>
+                          </div>
+    {%~ endif %}
+{% endfor %}
+                        </div>
+
+{% if hasSettings %}
+                        <div class="tab-pane fade" id="tab-settings" role="tabpanel" aria-labelledby="tab-settings-btn" tabindex="0">
+                          <section class="form-section">
+                            <h5 class="form-section__title"><?= __('Record settings') ?></h5>
+{% if 'visible' in fields %}
+                            <div class="row mb-3 align-items-center">
+                              <div class="col-12 col-md-2 text-start text-md-end">
+                                <?= $this->Form->label('visible', __('Visible') . ':', ['class' => 'form-control-label fw-bold mb-0']) ?>
+                              </div>
+                              <div class="col-12 col-md-9 d-flex align-items-center flex-wrap pt-1">
+                                <div class="form-check form-check-inline mb-0">
+                                  <?= $this->Form->checkbox('visible', ['class' => 'form-check-input', 'id' => 'visible', 'disabled' => true]) ?>
+                                  <?= $this->Form->label('visible', __('Visible'), ['class' => 'form-check-label']) ?>
+                                </div>
+                              </div>
+                            </div>
 {% endif %}
-{% if groupedFields.number %}
-    {%~ for field in groupedFields.number %}
-                <tr>
-                    <th><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'{{ field|humanize }}') ?></th>
-{% set columnData = Bake.columnData(field, schema) %}
-{% if columnData.null %}
-                    <td><?= ${{ singularVar }}->{{ field }} === null ? '' : $this->Number->format(${{ singularVar }}->{{ field }}) ?></td>
-        {%~ else %}
-                    <td><?= $this->Number->format(${{ singularVar }}->{{ field }}) ?></td>
-        {%~ endif %}
-                </tr>
-    {%~ endfor %}
+{% if 'pos' in fields %}
+                            <?php
+                            $posStep = max(1, (int)($show['posStep'] ?? 10));
+                            ?>
+                            <div class="row mb-3">
+                              <div class="col-12 col-md-2 text-start text-md-end">
+                                <?= $this->Form->label('pos', __('Pos') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                              </div>
+                              <div class="col-12 col-md-9">
+                                <?= $this->Form->control('pos', ['label' => false, 'type' => 'text', 'class' => 'form-control', 'data-number-spinner' => true, 'data-integer' => '1', 'inputmode' => 'numeric', 'min' => '0', 'step' => (string)$posStep, 'autocomplete' => 'off', 'placeholder' => '0', 'disabled' => true, 'templates' => $containerLess]) ?>
+                              </div>
+                            </div>
 {% endif %}
-{% if groupedFields.enum %}
-    {%~ for field in groupedFields.enum %}
-                <tr>
-                    <th><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'{{ field|humanize }}') ?></th>
-        {%~ set columnData = Bake.columnData(field, schema) %}
-        {%~ set supportsLabel = Bake.enumSupportsLabel(field, schema) %}
-        {%~ if columnData.null %}
-                    <td><?= ${{ singularVar }}->{{ field }} === null ? '' : h(${{ singularVar }}->{{ field }}->{% if supportsLabel %}label(){% else %}value{% endif %}) ?></td>
-        {%~ else %}
-                    <td><?= h(${{ singularVar }}->{{ field }}->{% if supportsLabel %}label(){% else %}value{% endif %}) ?></td>
-        {%~ endif %}
-                </tr>
-    {%~ endfor %}
+                          </section>
+                        </div>
 {% endif %}
-{% if groupedFields.date %}
-    {%~ for field in groupedFields.date %}
-                <tr>
-                    <th><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'{{ field|humanize }}') ?></th>
-                    <td><?= h(${{ singularVar }}->{{ field }}) ?></td>
-                </tr>
-    {%~ endfor %}
-{% endif %}
-{% if groupedFields.boolean %}
-    {%~ for field in groupedFields.boolean %}
-                <tr>
-                    <th><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'{{ field|humanize }}') ?></th>
-                    <td><?= ${{ singularVar }}->{{ field }} ? {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Yes') : {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'No'); ?></td>
-                </tr>
-    {%~ endfor %}
-{% endif %}
-            </table>
-{% if groupedFields.text %}
-    {%~ for field in groupedFields.text %}
-            <div class="text">
-                <strong><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'{{ field|humanize }}') ?></strong>
-                <blockquote>
-                    <?= $this->Text->autoParagraph(h(${{ singularVar }}->{{ field }})); ?>
-                </blockquote>
-            </div>
-    {%~ endfor %}
-{% endif %}
-{% set relations = associations.BelongsToMany|merge(associations.HasMany) %}
-{% for alias, details in relations %}
+
+                      </div>
+                    </div>
+
+                    <div class="card-footer border-top">
+                      <div class="offset-md-2">
+<?php if (!empty($show['editButton'])) : ?>
+                        <?= $this->Html->link(
+                            $this->Icon->outline('edit') . ' ' . __('Edit'),
+                            ['action' => 'edit', {{ pK|raw }}],
+                            ['class' => 'btn btn-primary', 'escape' => false]
+                        ) ?>
+<?php endif; ?>
+<?php if (!empty($show['cancelButton'])) : ?>
+                        <?= $this->Html->link(
+                            $this->Icon->outline('x') . ' ' . __('Cancel'),
+                            [
+                                'action' => 'index',
+                                '?' => array_filter([
+                                    'last' => {{ pK|raw }},
+                                    'listPage' => $this->request->getQuery('listPage'),
+                                ], fn($v) => $v !== null && $v !== ''),
+                            ],
+                            ['class' => 'btn btn-secondary', 'escape' => false]
+                        ) ?>
+<?php endif; ?>
+                      </div>
+                    </div>
+                  </div>
+                  <?= $this->Form->end() ?>
+
+{% set related = associations.HasMany|merge(associations.BelongsToMany) %}
+{% if related %}
+<?php if (!empty($show['relatedTables'])) : ?>
+                  <div class="card shadow related-card" style="margin-top: 16px;" aria-labelledby="{{ singularVar }}-related-title">
+                    <div class="card-header form-card-header">
+                      <div class="form-card-header__title">
+                        <strong id="{{ singularVar }}-related-title"><?= __('Related records') ?></strong>
+                        <small class="d-block"><?= h(${{ singularVar }}->{{ displayField }}) ?></small>
+                      </div>
+
+                      <ul class="nav nav-tabs card-header-tabs form-card-header__tabs" id="relatedTabs" role="tablist">
+{% for alias, details in related %}
+                        <li class="nav-item" role="presentation">
+                          <a class="nav-link{% if loop.first %} active{% endif %}" id="related-tab-{{ details.property }}-btn" data-bs-toggle="tab" href="#related-tab-{{ details.property }}" role="tab" aria-controls="related-tab-{{ details.property }}"{% if loop.first %} aria-current="page" aria-selected="true"{% else %} aria-selected="false"{% endif %}><?= __('{{ alias|humanize }}') ?></a>
+                        </li>
+{% endfor %}
+                      </ul>
+                    </div>
+
+                    <div class="card-body p-0">
+                      <div class="tab-content">
+{% for alias, details in related %}
     {%~ set otherSingularVar = alias|singularize|variable %}
     {%~ if otherSingularVar == singularVar %}
         {%~ set otherSingularVar = otherSingularVar ~ 'Related' %}
     {%~ endif %}
-    {%~ set otherPluralHumanName = details.controller|underscore|humanize %}
-            <div class="related">
-                <h4><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Related {{ otherPluralHumanName }}') ?></h4>
-                <?php if (!empty(${{ singularVar }}->{{ details.property }})) : ?>
-                <div class="table-responsive">
-                    <table>
-                        <tr>
-    {%~ for field in details.fields %}
-                            <th><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'{{ field|humanize }}') ?></th>
-    {%~ endfor %}
-                            <th class="actions"><?= {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Actions') ?></th>
-                        </tr>
-                        <?php foreach (${{ singularVar }}->{{ details.property }} as ${{ otherSingularVar }}) : ?>
-                        <tr>
-    {%~ for field in details.fields %}
-                            <td><?= h(${{ otherSingularVar }}->{{ field }}) ?></td>
-    {%~ endfor %}
-    {%~ set otherPk = '$' ~ otherSingularVar ~ '->' ~ details.primaryKey[0] %}
-                            <td class="actions">
-                                <?= $this->Html->link({% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'View'), ['controller' => '{{ details.controller }}', 'action' => 'view', {{ otherPk|raw }}]) ?>
-                                <?= $this->Html->link({% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Edit'), ['controller' => '{{ details.controller }}', 'action' => 'edit', {{ otherPk|raw }}]) ?>
-                                <?= $this->Form->postLink(
-                                    {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Delete'),
-                                    ['controller' => '{{ details.controller }}', 'action' => 'delete', {{ otherPk|raw }}],
-                                    [
-                                        'method' => 'delete',
-                                        'confirm' => {% if useDomain %}__d('{{ plugin }}', {% else %}__({% endif %}'Are you sure you want to delete # {0}?', {{ otherPk|raw }}),
-                                    ]
-                                ) ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </table>
-                </div>
-                <?php endif; ?>
-            </div>
+                        <div class="tab-pane fade{% if loop.first %} show active{% endif %}" id="related-tab-{{ details.property }}" role="tabpanel" aria-labelledby="related-tab-{{ details.property }}-btn" tabindex="0">
+                          <div class="table-responsive text-nowrap">
+                            <table class="table table-data2 table-border table-hover table-striped table-custom-hover mb-0">
+                              <thead>
+                                <tr>
+{% for field in details.fields %}
+    {%~ if field == 'id' %}
+<?php if (!empty($relatedShow['rowId'])) : ?>
+                                  <th class="integer id-col"><?= __('Id') ?></th>
+<?php endif; ?>
+    {%~ elseif field == 'visible' %}
+<?php if (!empty($relatedShow['visible'])) : ?>
+                                  <th class="boolean"><?= __('Visible') ?></th>
+<?php endif; ?>
+    {%~ elseif field == 'pos' %}
+<?php if (!empty($relatedShow['pos'])) : ?>
+                                  <th class="integer pos"><?= __('Pos') ?></th>
+<?php endif; ?>
+    {%~ elseif field in ['created', 'modified'] %}
+    {%~ else %}
+                                  <th class="string"><?= __('{{ field|humanize }}') ?></th>
+    {%~ endif %}
 {% endfor %}
-        </div>
-    </div>
-</div>
+{% if 'created' in details.fields or 'modified' in details.fields %}
+<?php if (!empty($relatedShow['created']) || !empty($relatedShow['modified'])) : ?>
+                                  <th class="datetime-meta">
+<?php     if (!empty($relatedShow['created'])) : ?>
+                                    <?= __('Created') ?>
+<?php     endif; ?>
+<?php     if (!empty($relatedShow['created']) && !empty($relatedShow['modified'])) : ?>
+                                    <br>
+<?php     endif; ?>
+<?php     if (!empty($relatedShow['modified'])) : ?>
+                                    <?= __('Modified') ?>
+<?php     endif; ?>
+                                  </th>
+<?php endif; ?>
+{% endif %}
+<?php if (!empty($relatedShow['viewButton']) || !empty($relatedShow['editButton']) || !empty($relatedShow['deleteButton'])) : ?>
+                                  <th class="action"><?= __('Actions') ?></th>
+<?php endif; ?>
+                                </tr>
+                              </thead>
+                              <tbody class="table-group-divider">
+<?php foreach (${{ singularVar }}->{{ details.property }} as ${{ otherSingularVar }}) : ?>
+                                <tr data-id="<?= h((string)${{ otherSingularVar }}->{{ details.primaryKey[0] }}) ?>">
+{% for field in details.fields %}
+    {%~ if field == 'id' %}
+<?php if (!empty($relatedShow['rowId'])) : ?>
+                                  <td class="integer id-col"><?= h((string)${{ otherSingularVar }}->id) ?></td>
+<?php endif; ?>
+    {%~ elseif field == 'visible' %}
+<?php if (!empty($relatedShow['visible'])) : ?>
+                                  <td class="boolean visible"><?= $this->Icon->boolean(${{ otherSingularVar }}->visible) ?></td>
+<?php endif; ?>
+    {%~ elseif field == 'pos' %}
+<?php if (!empty($relatedShow['pos'])) : ?>
+                                  <td class="integer pos"><?= ${{ otherSingularVar }}->pos === null ? '' : h((string)${{ otherSingularVar }}->pos) ?></td>
+<?php endif; ?>
+    {%~ elseif field in ['created', 'modified'] %}
+    {%~ else %}
+                                  <td class="string"><?= h(${{ otherSingularVar }}->{{ field }}) ?></td>
+    {%~ endif %}
+{% endfor %}
+{% if 'created' in details.fields or 'modified' in details.fields %}
+<?php if (!empty($relatedShow['created']) || !empty($relatedShow['modified'])) : ?>
+                                  <td class="datetime created-modified">
+<?php     if (!empty($relatedShow['created'])) : ?>
+                                    <span class="created"><?= h(${{ otherSingularVar }}->created) ?></span>
+<?php     endif; ?>
+<?php     if (!empty($relatedShow['created']) && !empty($relatedShow['modified'])) : ?>
+                                    <br>
+<?php     endif; ?>
+<?php     if (!empty($relatedShow['modified'])) : ?>
+                                    <span class="modified"><?= h(${{ otherSingularVar }}->modified) ?></span>
+<?php     endif; ?>
+                                  </td>
+<?php endif; ?>
+{% endif %}
+{% set otherPk = '$' ~ otherSingularVar ~ '->' ~ details.primaryKey[0] %}
+<?php if (!empty($relatedShow['viewButton']) || !empty($relatedShow['editButton']) || !empty($relatedShow['deleteButton'])) : ?>
+                                  <td class="action">
+                                    <div class="table-data-feature">
+<?php         if (!empty($relatedShow['viewButton'])) : ?>
+                                      <?= $this->Action->view({{ otherPk|raw }}, ['controller' => '{{ details.controller }}']) ?>
+<?php         endif; ?>
+<?php         if (!empty($relatedShow['editButton'])) : ?>
+                                      <?= $this->Action->edit({{ otherPk|raw }}, ['controller' => '{{ details.controller }}']) ?>
+<?php         endif; ?>
+<?php         if (!empty($relatedShow['deleteButton'])) : ?>
+                                      <?= $this->Action->delete({{ otherPk|raw }}, ['controller' => '{{ details.controller }}']) ?>
+<?php         endif; ?>
+                                    </div>
+                                  </td>
+<?php endif; ?>
+                                </tr>
+<?php endforeach; ?>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+{% endfor %}
+                      </div>
+                    </div>
+                  </div>
+<?php endif; ?>
+{% endif %}
+                </div>
+              </div>

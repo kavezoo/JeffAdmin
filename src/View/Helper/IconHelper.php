@@ -156,6 +156,39 @@ class IconHelper extends Helper
     }
 
     /**
+     * Általános logikai mező: vastag zöld pipa / vékony szürke üres négyzet.
+     *
+     *   <?= $this->Icon->boolean($entity->active) ?>
+     *
+     * @param bool|int|string|null $value Igazságos érték
+     * @param array<string, mixed> $options Extra HTML attribútumok / class
+     */
+    public function boolean(bool|int|string|null $value = false, array $options = []): string
+    {
+        $isYes = (bool)$value;
+        $label = $isYes ? __('Yes') : __('No');
+        $class = trim(
+            'boolean-icon ' . ($isYes ? 'boolean-icon--yes' : 'boolean-icon--no')
+            . ' ' . ($options['class'] ?? '')
+        );
+        unset($options['class']);
+
+        $iconClass = $isYes
+            ? 'fa-solid fa-check ' . $class
+            : 'fa-regular fa-square ' . $class;
+
+        $attrs = $this->templater()->formatAttributes(array_merge([
+            'class' => $iconClass,
+            'data-bs-toggle' => 'tooltip',
+            'data-bs-title' => $label,
+            'aria-label' => $label,
+            'aria-hidden' => 'true',
+        ], $options));
+
+        return '<i' . $attrs . '></i>';
+    }
+
+    /**
      * String második paramétert CSS classként kezeli.
      *
      * @param array|string $options

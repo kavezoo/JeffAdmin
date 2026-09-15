@@ -1167,18 +1167,7 @@ function initCommandPalette() {
     }
   });
 
-  // Wire the topbar search field — focusing it opens the palette instead
-  const topbarSearch = document.querySelector('.form-header .au-input');
-  if (topbarSearch) {
-    topbarSearch.addEventListener('focus', (e) => {
-      e.target.blur();
-      open();
-    });
-    topbarSearch.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      open();
-    });
-  }
+  // A header kereső mező sima GET kereső (Enter) — nem nyitja a command palette-et.
 }
 
 // Floating sidebar tooltip — only shown when the sidebar is collapsed on

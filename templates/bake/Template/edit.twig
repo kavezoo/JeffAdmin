@@ -1,16 +1,6 @@
 {#
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
- * @since         2.0.0
- * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ * JeffAdmin bake — Edit sablon.
  */
 #}
 <?php
@@ -19,14 +9,87 @@
  * @var \{{ entityClass }} ${{ singularVar }}
 {% if associations.BelongsTo is defined %}
     {%~ for assocName, assocData in associations.BelongsTo %}
- * @var string[]|\Cake\Collection\CollectionInterface ${{ assocData.variable }}
+ * @var \Cake\Collection\CollectionInterface|string[] ${{ assocData.variable }}
     {%~ endfor %}
 {% endif %}
 {% if associations.BelongsToMany is defined %}
     {%~ for assocName, assocData in associations.BelongsToMany %}
- * @var string[]|\Cake\Collection\CollectionInterface ${{ assocData.variable }}
+ * @var \Cake\Collection\CollectionInterface|string[] ${{ assocData.variable }}
     {%~ endfor %}
 {% endif %}
  */
+
+use Cake\Core\Configure;
+
+$show = Configure::read('JeffAdmin');
+$showLocal = [];
+
+$showLocal['edit'] = [
+//    'saveButton'   => false,
+//    'cancelButton' => false,
+//    'posStep'      => 5,   // pos spinner lépés (alap: 10)
+];
+
+$show = array_merge($show['edit'] ?? [], $showLocal['edit']);
+{% set hasSettings = ('visible' in fields) or ('pos' in fields) %}
+{% set displayFieldName = displayField %}
 ?>
+              <div class="row row-tight" style="margin-top: 16px;">
+                <div class="col-12 col-xxl-11">
+                  <?= $this->Form->create(${{ singularVar }}, [
+                      'class' => 'form-horizontal',
+                  ]) ?>
+                  <div class="card shadow" aria-labelledby="{{ singularVar }}-form-title">
+                    <div class="card-header form-card-header">
+                      <div class="form-card-header__title">
+                        <strong id="{{ singularVar }}-form-title"><?= __('Edit {{ singularHumanName }}') ?></strong>
+                        <small class="d-block"><?= h(${{ singularVar }}->{{ displayFieldName }}) ?></small>
+                      </div>
+
+                      <ul class="nav nav-tabs card-header-tabs form-card-header__tabs" id="formTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                          <a class="nav-link active" id="tab-basic-btn" data-bs-toggle="tab" href="#tab-basic" role="tab" aria-controls="tab-basic" aria-current="page" aria-selected="true"><?= __('Basic data') ?></a>
+                        </li>
+{% if hasSettings %}
+                        <li class="nav-item ms-auto" role="presentation">
+                          <a class="nav-link" id="tab-settings-btn" data-bs-toggle="tab" href="#tab-settings" role="tab" aria-controls="tab-settings" aria-selected="false"><?= __('Settings') ?></a>
+                        </li>
+{% endif %}
+                      </ul>
+
+                      <?= $this->Action->close(${{ singularVar }}->{{ primaryKey[0] }}) ?>
+                    </div>
+
+                    <div class="card-body form-card-body">
+                      <div class="tab-content">
 {{ element('Bake.form') }}
+                      </div>
+                    </div>
+
+                    <div class="card-footer border-top">
+                      <div class="offset-md-2">
+<?php if (!empty($show['saveButton'])) : ?>
+                        <?= $this->Form->button(
+                            $this->Icon->outline('device-floppy') . ' ' . __('Save'),
+                            ['type' => 'submit', 'class' => 'btn btn-success', 'escapeTitle' => false]
+                        ) ?>
+<?php endif; ?>
+<?php if (!empty($show['cancelButton'])) : ?>
+                        <?= $this->Html->link(
+                            $this->Icon->outline('x') . ' ' . __('Cancel'),
+                            [
+                                'action' => 'index',
+                                '?' => array_filter([
+                                    'last' => ${{ singularVar }}->{{ primaryKey[0] }},
+                                    'listPage' => $this->request->getQuery('listPage'),
+                                ], fn($v) => $v !== null && $v !== ''),
+                            ],
+                            ['class' => 'btn btn-secondary', 'escape' => false]
+                        ) ?>
+<?php endif; ?>
+                      </div>
+                    </div>
+                  </div>
+                  <?= $this->Form->end() ?>
+                </div>
+              </div>

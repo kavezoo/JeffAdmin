@@ -19,7 +19,9 @@
 #}
 {{ element('Bake.file_header', {
     namespace: "#{namespace}\\Controller#{prefix}",
-    classImports: (plugin or prefix) ? ["#{baseNamespace}\\Controller\\AppController"] : [],
+    classImports: prefix
+        ? ["#{baseNamespace}\\Controller#{prefix}\\AppController"]
+        : (plugin ? ["#{baseNamespace}\\Controller\\AppController"] : []),
 }) }}
 {% set has_login = 'login' in actions and Bake.hasPlugin('Authentication') %}
 {% set include_initialize = components or helpers or has_login %}

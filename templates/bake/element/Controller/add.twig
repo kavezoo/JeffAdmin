@@ -1,18 +1,10 @@
 {#
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
- * @since         2.0.0
- * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ * JeffAdmin — Controller add (rememberLastRecord mentés után).
  */
 #}
+{% set belongsTo = Bake.aliasExtractor(modelObj, 'BelongsTo') %}
+{% set belongsToMany = Bake.aliasExtractor(modelObj, 'belongsToMany') %}
 {% set compact = ["'#{singularName}'"] %}
     /**
      * Add method
@@ -26,18 +18,20 @@
         $this->Authorization->authorize(${{ singularName }});
 {% endif %}
         if ($this->request->is('post')) {
-            ${{ singularName }} = $this->{{ currentModelName }}->patchEntity(${{ singularName }}, $this->request->getData());
+            $data = $this->request->getData();
+            //dd($data);
+            ${{ singularName }} = $this->{{ currentModelName }}->patchEntity(${{ singularName }}, $data);
+            //dd(${{ singularName }}->toArray());
+            //dd(${{ singularName }}->getErrors());
             if ($this->{{ currentModelName }}->save(${{ singularName }})) {
                 $this->Flash->success({% if plugin %}__d('{{ plugin }}', {% else %}__({% endif %}'The {{ singularHumanName|lower }} has been saved.'));
+                $this->rememberLastRecord(${{ singularName }}->id);
 
                 return $this->redirect(['action' => 'index']);
             }
             $this->Flash->error({% if plugin %}__d('{{ plugin }}', {% else %}__({% endif %}'The {{ singularHumanName|lower }} could not be saved. Please, try again.'));
         }
-{% set associations = Bake.aliasExtractor(modelObj, 'BelongsTo') %}
-{% set associations = associations|merge(Bake.aliasExtractor(modelObj, 'BelongsToMany')) %}
-
-{%- for assoc in associations %}
+{% for assoc in belongsTo|merge(belongsToMany) %}
     {%~ set otherName = Bake.getAssociatedTableAlias(modelObj, assoc) %}
     {%~ set otherPlural = otherName|variable %}
     {%~ if otherPlural == singularName %}
