@@ -58,3 +58,5 @@ php bin/cake.php bake template ModelName --prefix Admin --force
 ```
 
 A generált index / add / edit / view a plugin `templates/bake/` sablonjaiból készül (Related tables dropdown, Settings fül, InputHelper, stb.). A CSS/JS a plugin `webroot/` alatt van (`JeffAdmin./css/main`, …) — a layout automatikusan betölti.
+
+(Added WebHook)
