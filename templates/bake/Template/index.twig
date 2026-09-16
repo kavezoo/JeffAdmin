@@ -8,6 +8,7 @@
 #}
 {%- set fields = Bake.filterFields(fields, schema, modelObject, indexColumns, ['binary', 'text']) -%}
 {%- set specialFields = ['id', 'visible', 'pos', 'created', 'modified'] -%}
+{%- set secretFields = ['password', 'passwords', 'passwd']|merge(hidden|default([])) -%}
 {%- set titleField = null -%}
 {%- if 'name' in fields -%}
     {%- set titleField = 'name' -%}
@@ -18,7 +19,7 @@
 {%- set currencySuffixes = ['price', 'amount', 'cost', 'total', 'fee', 'money', 'osszeg', 'dij'] -%}
 {%- set otherFields = [] -%}
 {%- for field in fields -%}
-    {%- if field not in specialFields and field != titleField and not (field ends with '_count') -%}
+    {%- if field not in specialFields and field != titleField and field not in secretFields and not (field ends with '_count') -%}
         {%- set otherFields = otherFields|merge([field]) -%}
     {%- endif -%}
 {%- endfor -%}

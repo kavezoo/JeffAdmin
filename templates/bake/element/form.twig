@@ -6,7 +6,8 @@
 #}
 {%- set fields = Bake.filterFields(fields, schema, modelObject) -%}
 {%- set settingsFields = ['visible', 'pos'] -%}
-{%- set skipFields = primaryKey|merge(['created', 'modified', 'updated']) -%}
+{%- set secretFields = ['password', 'passwords', 'passwd']|merge(hidden|default([])) -%}
+{%- set skipFields = primaryKey|merge(['created', 'modified', 'updated'])|merge(secretFields) -%}
 {%- set currencyExact = ['price', 'amount', 'cost', 'total', 'fee', 'net', 'gross', 'money', 'sum', 'ar', 'osszeg', 'dij', 'netto', 'brutto', 'unit_price', 'unitprice', 'net_price', 'gross_price'] -%}
 {%- set basicFields = [] -%}
 {%- set hasSettings = false -%}

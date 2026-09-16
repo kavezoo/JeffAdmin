@@ -25,7 +25,7 @@ return [
 			// Sorok kijelölése: checkbox oszlop + „összes kijelölése” a fejlécben.
 			'rowCheckbox' 	=> false,
 			// Rekord azonosító (id) oszlop.
-			'rowId' 		=> true,
+			'rowId' 		=> false,
 			// Név / title oszlop (bake: name, ha nincs: title).
 			'name' 			=> true,
 			// Láthatóság (visible) oszlop: boolean pipa / üres négyzet (vagy Icon->visible).

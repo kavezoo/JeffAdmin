@@ -5,7 +5,8 @@
 #}
 {% set fields = Bake.filterFields(fields, schema, modelObject) %}
 {% set settingsFields = ['visible', 'pos'] %}
-{% set skipFields = primaryKey|merge(['created', 'modified', 'updated']) %}
+{% set secretFields = ['password', 'passwords', 'passwd']|merge(hidden|default([])) %}
+{% set skipFields = primaryKey|merge(['created', 'modified', 'updated'])|merge(secretFields) %}
 {% set currencyExact = ['price', 'amount', 'cost', 'total', 'fee', 'net', 'gross', 'money', 'sum', 'ar', 'osszeg', 'dij', 'netto', 'brutto', 'unit_price', 'unitprice', 'net_price', 'gross_price'] %}
 {% set basicFields = [] %}
 {% for field in fields %}
@@ -255,7 +256,8 @@ $relatedShow = array_merge(Configure::read('JeffAdmin.index') ?? [], []);
                               <thead>
                                 <tr>
 {% for field in details.fields %}
-    {%~ if field == 'id' %}
+    {%~ if field in ['password', 'passwords', 'passwd', 'token'] %}
+    {%~ elseif field == 'id' %}
 <?php if (!empty($relatedShow['rowId'])) : ?>
                                   <th class="integer id-col"><?= __('Id') ?></th>
 <?php endif; ?>
@@ -296,7 +298,8 @@ $relatedShow = array_merge(Configure::read('JeffAdmin.index') ?? [], []);
 <?php foreach (${{ singularVar }}->{{ details.property }} as ${{ otherSingularVar }}) : ?>
                                 <tr data-id="<?= h((string)${{ otherSingularVar }}->{{ details.primaryKey[0] }}) ?>">
 {% for field in details.fields %}
-    {%~ if field == 'id' %}
+    {%~ if field in ['password', 'passwords', 'passwd', 'token'] %}
+    {%~ elseif field == 'id' %}
 <?php if (!empty($relatedShow['rowId'])) : ?>
                                   <td class="integer id-col"><?= h((string)${{ otherSingularVar }}->id) ?></td>
 <?php endif; ?>

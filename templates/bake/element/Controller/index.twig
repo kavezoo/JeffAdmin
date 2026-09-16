@@ -14,10 +14,11 @@
     {%- set pkField = pk -%}
 {%- endif -%}
 {%- set tableSchema = modelObj.getSchema() -%}
+{%- set secretFields = ['password', 'passwords', 'passwd'] -%}
 {%- set searchOwn = [] -%}
 {%- for column in tableSchema.columns() -%}
     {%- set colType = tableSchema.getColumnType(column) -%}
-    {%- if colType in ['string', 'text'] and column != pkField -%}
+    {%- if colType in ['string', 'text'] and column != pkField and column not in secretFields -%}
         {%- set searchOwn = searchOwn|merge([column]) -%}
     {%- endif -%}
 {%- endfor -%}
