@@ -649,6 +649,56 @@ body.app .card-header.form-card-header .form-card-header__tabs .nav-item.dropdow
   margin-top: 2px;
 }
 
+/* View — kapcsolt rekordok: cím balra, TAB-ok alatta (ne folyjon össze a címmel) */
+body.app .card > .card-header.related-card-header,
+body.app .card-header.related-card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  position: relative;
+  z-index: 5;
+  padding: 12px 20px 0;
+  border-bottom: 1px solid var(--m-border, #e4e7ec);
+  background-color: #f0f1f3;
+}
+
+body.app .card-header.related-card-header .related-card-header__title {
+  flex: 0 0 auto;
+  text-align: left;
+  line-height: 1.25;
+  padding-bottom: 2px;
+}
+
+body.app .card-header.related-card-header .related-card-header__tabs.nav-tabs.card-header-tabs {
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  width: 100%;
+  margin: 0;
+  margin-bottom: -1px;
+  border-bottom: 0;
+  row-gap: 4px;
+}
+
+body.app .card-header.related-card-header .related-card-header__tabs .nav-link {
+  color: #9aa0a6;
+  border: 1px solid #e0e0e0;
+  border-bottom-color: transparent;
+  background-color: transparent;
+}
+
+body.app .card-header.related-card-header .related-card-header__tabs .nav-link:hover {
+  color: var(--m-text, #1f2937);
+  border-color: #d0d0d0;
+  border-bottom-color: transparent;
+}
+
+body.app .card-header.related-card-header .related-card-header__tabs .nav-link.active {
+  color: var(--m-text, #1f2937);
+  background-color: var(--m-surface, #fff);
+  border-color: var(--bs-border-color, #dee2e6) var(--bs-border-color, #dee2e6) var(--m-surface, #fff);
+}
+
 /* Index lista — bal cím, jobb: fülek + Új gomb; fül alja a card-body tetejéhez ér */
 body.app .card > .card-header.index-card-header,
 body.app .card-header.index-card-header {

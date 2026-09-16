@@ -228,13 +228,12 @@ $relatedShow = array_merge(Configure::read('JeffAdmin.index') ?? [], []);
 {% if related %}
 <?php if (!empty($show['relatedTables'])) : ?>
                   <div class="card shadow related-card" style="margin-top: 16px;" aria-labelledby="{{ singularVar }}-related-title">
-                    <div class="card-header form-card-header">
-                      <div class="form-card-header__title">
-                        <strong id="{{ singularVar }}-related-title"><?= __('Related records') ?></strong>
-                        <small class="d-block"><?= h(${{ singularVar }}->{{ displayField }}) ?></small>
+                    <div class="card-header related-card-header">
+                      <div class="related-card-header__title">
+                        <span id="{{ singularVar }}-related-title"><?= __('Related records') ?>: <?= h(${{ singularVar }}->{{ displayField }}) ?></span>
                       </div>
 
-                      <ul class="nav nav-tabs card-header-tabs form-card-header__tabs" id="relatedTabs" role="tablist">
+                      <ul class="nav nav-tabs card-header-tabs related-card-header__tabs" id="relatedTabs" role="tablist">
 {% for alias, details in related %}
                         <li class="nav-item" role="presentation">
                           <a class="nav-link{% if loop.first %} active{% endif %}" id="related-tab-{{ details.property }}-btn" data-bs-toggle="tab" href="#related-tab-{{ details.property }}" role="tab" aria-controls="related-tab-{{ details.property }}"{% if loop.first %} aria-current="page" aria-selected="true"{% else %} aria-selected="false"{% endif %}><?= __('{{ alias|humanize }}') ?></a>

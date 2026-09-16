@@ -1,5 +1,7 @@
 # JeffAdmin
 
+**Version:** 0.0.9
+
 JeffAdmin plugin for CakePHP 5 projects — admin UI, helpers, assets, and Bake theme.
 
 Composer: [`kavezoo/jeffadmin`](https://packagist.org/packages/kavezoo/jeffadmin)
