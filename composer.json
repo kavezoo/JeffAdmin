@@ -1,7 +1,17 @@
 {
-    "name": "jeff/jeff-admin",
+    "name": "kavezoo/jeffadmin",
     "description": "JeffAdmin — CakePHP 5 admin UI plugin (layout, helpers, bake theme)",
     "type": "cakephp-plugin",
+	"keywords": ["cakephp", "cooladmin", "admin", "plugin"],
+	"homepage": "https://github.com/kavezoo/JeffAdmin/tree/main",
+    "authors": [
+        {
+            "name": "Jeff Shoemaker",
+            "email": "kavezoo@gmail.com",
+            "homepage": "https://vzsfoto.hu",
+            "role": "Developer"
+        }
+    ],
     "license": "MIT",
     "require": {
         "php": ">=8.1",
