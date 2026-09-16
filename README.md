@@ -1,6 +1,8 @@
 # JeffAdmin
 
-**Version:** 0.0.13
+**Version:** 1.0.0
+
+**First stable release.** JeffAdmin **1.0.0** is the initial production-ready release of the plugin.
 
 JeffAdmin is a CakePHP 5 admin UI plugin: layout, assets, view helpers, display switches, and a Bake theme that generates list, form, and view screens in one consistent look.
 
@@ -27,6 +29,13 @@ Create a CakePHP ~5.4 app (or use an existing one), then require the plugin:
 ```bash
 composer create-project --prefer-dist cakephp/app:~5.4 my_app_name
 cd my_app_name
+composer require kavezoo/jeffadmin:^1.0
+composer require --dev cakephp/bake
+```
+
+Or, without a version constraint (latest stable):
+
+```bash
 composer require kavezoo/jeffadmin
 composer require --dev cakephp/bake
 ```
@@ -241,7 +250,7 @@ $show = array_merge($show['edit'] ?? [], $showLocal['edit']);
 composer update kavezoo/jeffadmin
 ```
 
-If `composer.json` pins an exact version, widen the constraint (e.g. `^0.0.12`) first, then update.
+If `composer.json` pins an exact version, widen the constraint (e.g. `^1.0`) first, then update.
 
 ## License
 
