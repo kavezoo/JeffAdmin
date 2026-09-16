@@ -44,6 +44,8 @@ return [
 			'editButton' 	=> true,
 			// Műveletek: törlés (delete) gomb, megerősítéssel.
 			'deleteButton' 	=> true,
+			// Kapcsolt táblák dropdown a card headerben (Related tables).
+			'relatedTables'	=> true,
 			// Sor dupla kattintás: 'edit' | 'view' | 'none' (alap: edit).
 			'rowDblClick' 	=> 'edit',
 		],
@@ -56,6 +58,8 @@ return [
 			'cancelButton' 	=> true,
 			// Törlés gomb (jobbra, danger) — *_count > 0 esetén disabled; SWAL confirm.
 			'deleteButton' 	=> true,
+			// Kapcsolt táblák dropdown a card headerben (Related tables).
+			'relatedTables'	=> true,
 			// pos mező number spinner lépésköze (alap: 10).
 			'posStep' 		=> 10,
 		],
@@ -66,6 +70,8 @@ return [
 			'saveButton' 	=> true,
 			// Mégse: visszalépés a listára, mentés nélkül.
 			'cancelButton' 	=> true,
+			// Kapcsolt táblák dropdown a card headerben (Related tables).
+			'relatedTables'	=> true,
 			// pos mező number spinner lépésköze (alap: 10).
 			'posStep' 		=> 10,
 		],
@@ -78,7 +84,7 @@ return [
 			'cancelButton' 	=> true,
 			// Törlés gomb (jobbra, danger) — *_count > 0 esetén disabled.
 			'deleteButton' 	=> true,
-			// Kapcsolódó táblák (hasMany / belongsToMany) listája a rekord alatt.
+			// Kapcsolt táblák: header dropdown + hasMany/belongsToMany lista a rekord alatt.
 			'relatedTables'	=> true,
 			// pos mező number spinner lépésköze (disabled mezőn is, alap: 10).
 			'posStep' 		=> 10,

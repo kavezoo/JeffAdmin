@@ -25,10 +25,11 @@ $show = Configure::read('JeffAdmin');
 $showLocal = [];
 
 $showLocal['edit'] = [
-//    'saveButton'   => false,
-//    'cancelButton' => false,
-//    'deleteButton' => false,
-//    'posStep'      => 5,   // pos spinner lépés (alap: 10)
+//    'saveButton'     => false,
+//    'cancelButton'   => false,
+//    'deleteButton'   => false,
+//    'relatedTables'  => false,
+//    'posStep'        => 5,   // pos spinner lépés (alap: 10)
 ];
 
 $show = array_merge($show['edit'] ?? [], $showLocal['edit']);

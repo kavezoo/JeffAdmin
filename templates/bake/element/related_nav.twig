@@ -3,7 +3,8 @@
  * JeffAdmin bake — kapcsolt táblák dropdown (+ opcionális Settings fül).
  *
  * Settings előtt jelenik meg (Settings marad az utolsó fül).
- * Csak akkor van Related fül, ha van közvetlen asszociáció (navLink).
+ * Related fül csak ha van közvetlen asszociáció (navLink) ÉS
+ * $show['relatedTables'] igaz (JeffAdmin.show + $showLocal).
  *
  * View / element data:
  * - associations, fields (Bake context)
@@ -34,6 +35,7 @@
     {%- endif -%}
 {%- endfor -%}
 {% if relatedNavItems %}
+<?php if (!empty($show['relatedTables'])) : ?>
                         <li class="nav-item dropdown{% if relatedMsAuto %} ms-auto{% endif %}" role="presentation">
                           <a class="nav-link dropdown-toggle" href="#" id="tab-related-btn" role="button" data-bs-toggle="dropdown" aria-expanded="false"><?= __('Related tables') ?></a>
                           <ul class="dropdown-menu" aria-labelledby="tab-related-btn">
@@ -42,9 +44,14 @@
 {% endfor %}
                           </ul>
                         </li>
+<?php endif; ?>
 {% endif %}
 {% if hasSettingsTab %}
-                        <li class="nav-item{% if not relatedNavItems %} ms-auto{% endif %}" role="presentation">
+{% if relatedNavItems %}
+                        <li class="nav-item<?= empty($show['relatedTables']) ? ' ms-auto' : '' ?>" role="presentation">
+{% else %}
+                        <li class="nav-item ms-auto" role="presentation">
+{% endif %}
                           <a class="nav-link" id="tab-settings-btn" data-bs-toggle="tab" href="#tab-settings" role="tab" aria-controls="tab-settings" aria-selected="false"><?= __('Settings') ?></a>
                         </li>
 {% endif %}
