@@ -612,6 +612,17 @@ body.app .card-header.form-card-header .form-card-header__tabs .nav-link.active 
   border-color: var(--bs-border-color, #dee2e6) var(--bs-border-color, #dee2e6) var(--m-surface, #fff);
 }
 
+body.app .card-header.form-card-header .form-card-header__tabs .nav-link.dropdown-toggle.show {
+  color: var(--m-text, #1f2937);
+  background-color: var(--m-surface, #fff);
+  border-color: var(--bs-border-color, #dee2e6);
+}
+
+body.app .card-header.form-card-header .form-card-header__tabs .nav-item.dropdown .dropdown-menu {
+  z-index: 1055;
+  margin-top: 2px;
+}
+
 body.app .card-header.form-card-header .form-card-header__close {
   flex-shrink: 0;
   margin-bottom: 6px;

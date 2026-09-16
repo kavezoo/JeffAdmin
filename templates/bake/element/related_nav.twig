@@ -1,0 +1,40 @@
+{#
+/**
+ * JeffAdmin bake — kapcsolt táblák dropdown + Settings fül a card header tabs-ban.
+ *
+ * Settings előtt jelenik meg (Settings marad az utolsó fül).
+ * Csak akkor van Related fül, ha van közvetlen asszociáció (navLink).
+ * Változók: associations, fields (Bake View context)
+ */
+#}
+{%- set hasSettingsTab = ('visible' in fields) or ('pos' in fields) -%}
+{%- set relatedNavDone = [] -%}
+{%- set relatedNavItems = [] -%}
+{%- for type in ['BelongsTo', 'HasOne', 'HasMany', 'BelongsToMany'] -%}
+    {%- if associations[type] is defined and associations[type] -%}
+        {%- for alias, details in associations[type] -%}
+            {%- if details.navLink and details.controller not in relatedNavDone -%}
+                {%- set relatedNavDone = relatedNavDone|merge([details.controller]) -%}
+                {%- set relatedNavItems = relatedNavItems|merge([{
+                    'controller': details.controller,
+                    'label': alias|humanize
+                }]) -%}
+            {%- endif -%}
+        {%- endfor -%}
+    {%- endif -%}
+{%- endfor -%}
+{% if relatedNavItems %}
+                        <li class="nav-item dropdown ms-auto" role="presentation">
+                          <a class="nav-link dropdown-toggle" href="#" id="tab-related-btn" role="button" data-bs-toggle="dropdown" aria-expanded="false"><?= __('Related tables') ?></a>
+                          <ul class="dropdown-menu" aria-labelledby="tab-related-btn">
+{% for item in relatedNavItems %}
+                            <li><?= $this->Html->link(__('List {{ item.label }}'), ['controller' => '{{ item.controller }}', 'action' => 'index'], ['class' => 'dropdown-item']) ?></li>
+{% endfor %}
+                          </ul>
+                        </li>
+{% endif %}
+{% if hasSettingsTab %}
+                        <li class="nav-item{% if not relatedNavItems %} ms-auto{% endif %}" role="presentation">
+                          <a class="nav-link" id="tab-settings-btn" data-bs-toggle="tab" href="#tab-settings" role="tab" aria-controls="tab-settings" aria-selected="false"><?= __('Settings') ?></a>
+                        </li>
+{% endif %}

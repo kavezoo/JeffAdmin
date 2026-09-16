@@ -50,11 +50,7 @@ $show = array_merge($show['edit'] ?? [], $showLocal['edit']);
                         <li class="nav-item" role="presentation">
                           <a class="nav-link active" id="tab-basic-btn" data-bs-toggle="tab" href="#tab-basic" role="tab" aria-controls="tab-basic" aria-current="page" aria-selected="true"><?= __('Basic data') ?></a>
                         </li>
-{% if hasSettings %}
-                        <li class="nav-item ms-auto" role="presentation">
-                          <a class="nav-link" id="tab-settings-btn" data-bs-toggle="tab" href="#tab-settings" role="tab" aria-controls="tab-settings" aria-selected="false"><?= __('Settings') ?></a>
-                        </li>
-{% endif %}
+{{ element('Bake.related_nav') }}
                       </ul>
 
                       <?= $this->Action->close(${{ singularVar }}->{{ primaryKey[0] }}) ?>
