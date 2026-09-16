@@ -41,7 +41,7 @@ public function bootstrap(): void
 }
 ```
 
-The plugin bootstrap loads `JeffAdmin.show`, registers helpers (`Icon`, `Action`, `Format`, `Input`), and sets `Bake.theme` to `JeffAdmin` when no other bake theme is configured.
+The plugin bootstrap loads `JeffAdmin.show` and `JeffAdmin.nav`, registers helpers (`Icon`, `Action`, `Format`, `Input`), and sets `Bake.theme` to `JeffAdmin` when no other bake theme is configured.
 
 ### 2. Configure Bootstrap
 
@@ -162,16 +162,48 @@ bin/cake bake template all --prefix Member
 
 ## Customizing Layout Elements & Menu
 
-To customize headers, footers, or navigation, copy the default elements from the plugin into your project (e.g. `templates/element/` or a prefix-specific path your layout uses):
+### Sidebar menu (`JeffAdmin.nav`)
 
-```bash
-mkdir -p templates/element
-cp vendor/kavezoo/jeffadmin/templates/element/header.php templates/element/header.php
-cp vendor/kavezoo/jeffadmin/templates/element/header_top.php templates/element/header_top.php
-cp vendor/kavezoo/jeffadmin/templates/element/footer.php templates/element/footer.php
-cp vendor/kavezoo/jeffadmin/templates/element/nav.php templates/element/nav.php
+The plugin ships an **empty** sidebar. Define items in the host `config/bootstrap.php` (or any config loaded after the plugin):
+
+```php
+use Cake\Core\Configure;
+
+Configure::write('JeffAdmin.nav', [
+    [
+        'type' => 'group',
+        'label' => 'Tables',
+        'icon' => 'fa-solid fa-table',
+        'items' => [
+            ['controller' => 'Articles', 'label' => 'Articles'],
+            ['controller' => 'Tags', 'label' => 'Tags'],
+        ],
+    ],
+    [
+        'type' => 'link',
+        'controller' => 'Dashboard',
+        'label' => 'Dashboard',
+        'icon' => 'fa-solid fa-gauge',
+    ],
+]);
 ```
 
+Labels are passed through `__()`. Optional per-item keys: `action` (default `index`), `prefix`.
+
+### Override elements
+
+To replace header, footer, or the whole nav markup, override the plugin element in the host:
+
+```text
+templates/plugin/JeffAdmin/element/header.php
+templates/plugin/JeffAdmin/element/header_top.php
+templates/plugin/JeffAdmin/element/footer.php
+templates/plugin/JeffAdmin/element/nav.php
+```
+
+Copy from `vendor/kavezoo/jeffadmin/templates/element/` if you need a starting point.
+
+UI assets (CSS/JS, Tom Select, SweetAlert, layout) live **only** in the plugin — other projects get them via Composer; do not copy `webroot` into the host.
 ## Display switches (`$show`)
 
 Global defaults: plugin `config/show.php` → `Configure::read('JeffAdmin')`.

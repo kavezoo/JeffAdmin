@@ -649,16 +649,6 @@ body.app .card-header.form-card-header .form-card-header__tabs .nav-item.dropdow
   margin-top: 2px;
 }
 
-body.app .card-header.index-card-header .index-card-header__tabs .nav-item.dropdown .dropdown-menu {
-  z-index: 1060;
-  margin-top: 2px;
-}
-
-/* Tom Select lista a body-n — card magasságától függetlenül */
-body.app .ts-dropdown {
-  z-index: 2000;
-}
-
 /* Index lista — bal cím, jobb: fülek + Új gomb; fül alja a card-body tetejéhez ér */
 body.app .card > .card-header.index-card-header,
 body.app .card-header.index-card-header {
@@ -976,6 +966,7 @@ body.app .ts-wrapper--sm .ts-control {
 }
 
 body.app .ts-dropdown {
+  z-index: 2000;
   border: 1px solid var(--m-border, #e4e7ec);
   border-radius: 8px;
   box-shadow: var(--m-shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.08));

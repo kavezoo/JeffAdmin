@@ -56,8 +56,8 @@ ready(() => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'btn btn-outline-secondary select-with-action__btn';
-        btn.setAttribute('aria-label', 'További lehetőségek');
-        btn.title = 'További lehetőségek';
+        btn.setAttribute('aria-label', 'More options');
+        btn.title = 'More options';
         btn.innerHTML = '<i class="fa-solid fa-ellipsis" aria-hidden="true"></i>';
         wrap.appendChild(btn);
       }
@@ -77,12 +77,12 @@ ready(() => {
 
       if (isMultiple) {
         options.plugins = {
-          remove_button: { title: 'Eltávolítás' },
-          clear_button: { title: 'Összes eltávolítása' },
+          remove_button: { title: 'Remove' },
+          clear_button: { title: 'Remove all' },
         };
         options.hideSelected = true;
         options.closeAfterSelect = false;
-        options.placeholder = el.getAttribute('placeholder') || 'Válassz…';
+        options.placeholder = el.getAttribute('placeholder') || 'Select…';
       } else {
         options.allowEmptyOption = true;
       }

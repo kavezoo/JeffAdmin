@@ -1,50 +1,101 @@
 <?php
 /**
- * Oldalsáv navigáció.
+ * Oldalsáv navigáció — tételek: Configure::read('JeffAdmin.nav').
  *
- * @var \App\View\AppView $this
+ * Felülírás más projektben: templates/plugin/JeffAdmin/element/nav.php
+ * vagy Configure::write('JeffAdmin.nav', […]) a host bootstrapjában.
+ *
+ * @var \Cake\View\View $this
  * @var string $controller
  * @var string $prefix
  */
+use Cake\Core\Configure;
+
 $current = (string)($controller ?? $this->getRequest()->getParam('controller') ?? '');
-$prefixName = ($prefix ?? '') !== '' ? (string)$prefix : 'Admin';
+$prefixName = ($prefix ?? '') !== '' ? (string)$prefix : (string)($this->getRequest()->getParam('prefix') ?? 'Admin');
+$items = Configure::read('JeffAdmin.nav') ?? [];
+if (!is_array($items)) {
+    $items = [];
+}
 
-$tables = ['Customers', 'Orders', 'Items', 'OrdersItems'];
-$tablesOpen = in_array($current, $tables, true);
-
-$indexUrl = fn(string $name): array => [
-    'prefix' => $prefixName,
-    'controller' => $name,
-    'action' => 'index',
-];
+$indexUrl = function (string $name, ?string $action = null, ?string $itemPrefix = null) use ($prefixName): array {
+    return [
+        'prefix' => $itemPrefix !== null && $itemPrefix !== '' ? $itemPrefix : $prefixName,
+        'controller' => $name,
+        'action' => $action !== null && $action !== '' ? $action : 'index',
+    ];
+};
 ?>
 <nav class="navbar-sidebar">
     <ul class="list-unstyled navbar__list">
-        <li class="has-sub<?= $tablesOpen ? ' active' : '' ?>">
-            <a class="js-arrow<?= $tablesOpen ? ' open' : '' ?>" href="#">
-                <i class="fa-solid fa-table" aria-hidden="true"></i><?= __('Tables') ?>
-            </a>
-            <ul class="list-unstyled navbar__sub-list js-sub-list"<?= $tablesOpen ? ' style="display: block;"' : '' ?>>
-                <li<?= $current === 'Customers' ? ' class="active"' : '' ?>>
-                    <?= $this->Html->link(__('Customers'), $indexUrl('Customers')) ?>
+        <?php foreach ($items as $entry): ?>
+            <?php
+            if (!is_array($entry) || empty($entry['type'])) {
+                continue;
+            }
+            $type = (string)$entry['type'];
+            ?>
+            <?php if ($type === 'group'): ?>
+                <?php
+                $children = $entry['items'] ?? [];
+                if (!is_array($children)) {
+                    $children = [];
+                }
+                $childControllers = [];
+                foreach ($children as $child) {
+                    if (is_array($child) && !empty($child['controller'])) {
+                        $childControllers[] = (string)$child['controller'];
+                    }
+                }
+                $groupOpen = in_array($current, $childControllers, true);
+                $icon = (string)($entry['icon'] ?? 'fa-solid fa-folder');
+                $label = (string)($entry['label'] ?? 'Menu');
+                ?>
+                <li class="has-sub<?= $groupOpen ? ' active' : '' ?>">
+                    <a class="js-arrow<?= $groupOpen ? ' open' : '' ?>" href="#">
+                        <i class="<?= h($icon) ?>" aria-hidden="true"></i><?= h(__($label)) ?>
+                    </a>
+                    <ul class="list-unstyled navbar__sub-list js-sub-list"<?= $groupOpen ? ' style="display: block;"' : '' ?>>
+                        <?php foreach ($children as $child): ?>
+                            <?php
+                            if (!is_array($child) || empty($child['controller'])) {
+                                continue;
+                            }
+                            $childController = (string)$child['controller'];
+                            $childLabel = (string)($child['label'] ?? $childController);
+                            $childAction = isset($child['action']) ? (string)$child['action'] : 'index';
+                            $childPrefix = isset($child['prefix']) ? (string)$child['prefix'] : null;
+                            ?>
+                            <li<?= $current === $childController ? ' class="active"' : '' ?>>
+                                <?= $this->Html->link(
+                                    __($childLabel),
+                                    $indexUrl($childController, $childAction, $childPrefix)
+                                ) ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
                 </li>
-                <li<?= $current === 'Orders' ? ' class="active"' : '' ?>>
-                    <?= $this->Html->link(__('Orders'), $indexUrl('Orders')) ?>
+            <?php elseif ($type === 'link'): ?>
+                <?php
+                if (empty($entry['controller'])) {
+                    continue;
+                }
+                $linkController = (string)$entry['controller'];
+                $linkLabel = (string)($entry['label'] ?? $linkController);
+                $linkAction = isset($entry['action']) ? (string)$entry['action'] : 'index';
+                $linkPrefix = isset($entry['prefix']) ? (string)$entry['prefix'] : null;
+                $linkIcon = (string)($entry['icon'] ?? '');
+                $linkHtml = ($linkIcon !== '' ? '<i class="' . h($linkIcon) . '" aria-hidden="true"></i>' : '')
+                    . h(__($linkLabel));
+                ?>
+                <li<?= $current === $linkController ? ' class="active"' : '' ?>>
+                    <?= $this->Html->link(
+                        $linkHtml,
+                        $indexUrl($linkController, $linkAction, $linkPrefix),
+                        ['escape' => false]
+                    ) ?>
                 </li>
-                <li<?= $current === 'Items' ? ' class="active"' : '' ?>>
-                    <?= $this->Html->link(__('Items'), $indexUrl('Items')) ?>
-                </li>
-                <li<?= $current === 'OrdersItems' ? ' class="active"' : '' ?>>
-                    <?= $this->Html->link(__('OrdersItems'), $indexUrl('OrdersItems')) ?>
-                </li>
-            </ul>
-        </li>
-        <li<?= $current === 'Cities' ? ' class="active"' : '' ?>>
-            <?= $this->Html->link(
-                '<i class="fa-solid fa-city" aria-hidden="true"></i>' . h(__('Cities')),
-                $indexUrl('Cities'),
-                ['escape' => false]
-            ) ?>
-        </li>
+            <?php endif; ?>
+        <?php endforeach; ?>
     </ul>
 </nav>
