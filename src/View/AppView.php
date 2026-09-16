@@ -23,6 +23,6 @@ class AppView extends View
     {
         parent::initialize();
 
-        $this->loadHelper('JeffAdmin.Icon');
+        //$this->loadHelper('JeffAdmin.Icon');
     }
 }

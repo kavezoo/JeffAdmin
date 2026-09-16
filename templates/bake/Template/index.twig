@@ -302,6 +302,12 @@ if ($rowDblClick !== 'none') {
                               <td class="{{ cssClass }}"><?= $this->Icon->boolean(${{ singularVar }}->{{ field }}) ?></td>
 {% elseif columnData.type starts with 'enum-' %}
                               <td class="{{ cssClass }}"><?= ${{ singularVar }}->{{ field }} === null ? '' : h(${{ singularVar }}->{{ field }}->value) ?></td>
+{% elseif columnData.type == 'date' %}
+                              <td class="{{ cssClass }}"><?= $this->Input->formatDate(${{ singularVar }}->{{ field }}) ?></td>
+{% elseif columnData.type == 'time' %}
+                              <td class="{{ cssClass }}"><?= $this->Input->formatTime(${{ singularVar }}->{{ field }}) ?></td>
+{% elseif columnData.type in ['datetime', 'timestamp'] %}
+                              <td class="{{ cssClass }}"><?= $this->Input->formatDatetime(${{ singularVar }}->{{ field }}) ?></td>
 {% elseif columnData.type in ['integer', 'biginteger', 'smallinteger', 'tinyinteger', 'float', 'decimal'] %}
                               <td class="{{ cssClass }}"><?= ${{ singularVar }}->{{ field }} === null ? '' : $this->Number->format(${{ singularVar }}->{{ field }}) ?></td>
 {% else %}
@@ -331,13 +337,13 @@ if ($rowDblClick !== 'none') {
 <?php if (!empty($show['created']) || !empty($show['modified'])) : ?>
                               <td class="datetime created-modified">
 <?php     if (!empty($show['created'])) : ?>
-                                <span class="created"><?= h(${{ singularVar }}->created) ?></span>
+                                <span class="created"><?= $this->Input->formatDatetime(${{ singularVar }}->created) ?></span>
 <?php     endif; ?>
 <?php     if (!empty($show['created']) && !empty($show['modified'])) : ?>
                                 <br>
 <?php     endif; ?>
 <?php     if (!empty($show['modified'])) : ?>
-                                <span class="modified"><?= h(${{ singularVar }}->modified) ?></span>
+                                <span class="modified"><?= $this->Input->formatDatetime(${{ singularVar }}->modified) ?></span>
 <?php     endif; ?>
                               </td>
 <?php endif; ?>

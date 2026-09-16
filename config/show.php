@@ -23,7 +23,7 @@ return [
 		// --- index: listanézet oszlopai és műveleti gombjai ---
 		'index' => [
 			// Sorok kijelölése: checkbox oszlop + „összes kijelölése” a fejlécben.
-			'rowCheckbox' 	=> true,
+			'rowCheckbox' 	=> false,
 			// Rekord azonosító (id) oszlop.
 			'rowId' 		=> true,
 			// Név / title oszlop (bake: name, ha nincs: title).

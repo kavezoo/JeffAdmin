@@ -44,6 +44,7 @@ class JeffAdminPlugin extends BasePlugin
                 $controller->viewBuilder()->addHelper('JeffAdmin.Icon');
                 $controller->viewBuilder()->addHelper('JeffAdmin.Action');
                 $controller->viewBuilder()->addHelper('JeffAdmin.Format');
+                $controller->viewBuilder()->addHelper('JeffAdmin.Input');
             }
         );
     }

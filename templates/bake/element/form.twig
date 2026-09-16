@@ -24,9 +24,6 @@
 {%- else -%}
     {%- set hasBelongsToMany = false -%}
 {%- endif -%}
-                        <?php
-                        $containerLess = ['inputContainer' => '{{ '{{' }}content{{ '}}' }}'];
-                        ?>
                         <div class="tab-pane fade show active" id="tab-basic" role="tabpanel" aria-labelledby="tab-basic-btn" tabindex="0">
 {% for field in basicFields %}
     {%~ set fieldData = Bake.columnData(field, schema) %}
@@ -48,7 +45,7 @@
                             </div>
                             <div class="col-12 col-md-9">
                               <div class="select-with-action">
-                                <?= $this->Form->control('{{ field }}', ['label' => false, 'options' => ${{ keyFields[field] }}, 'empty' => __('Please select'), 'class' => 'form-select', 'data-tom-select' => true, 'templates' => $containerLess]) ?>
+                                <?= $this->Input->control('{{ field }}', ['options' => ${{ keyFields[field] }}, 'empty' => __('Please select'), 'class' => 'form-select', 'data-tom-select' => true]) ?>
                                 <button type="button" class="btn btn-outline-secondary select-with-action__btn" aria-label="<?= h(__('More options')) ?>" data-bs-toggle="tooltip" data-bs-title="<?= h(__('More options')) ?>">
                                   <?= $this->Icon->outline('dots') ?>
                                 </button>
@@ -73,16 +70,34 @@
                               <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
                             </div>
                             <div class="col-12 col-md-9">
-                              <?= $this->Form->control('{{ field }}', ['label' => false, 'type' => 'textarea', 'rows' => 4, 'class' => 'form-control', 'templates' => $containerLess]) ?>
+                              <?= $this->Input->control('{{ field }}', ['type' => 'textarea', 'rows' => 4, 'class' => 'form-control']) ?>
                             </div>
                           </div>
-    {%~ elseif fieldData.type in ['date', 'datetime', 'time', 'timestamp'] %}
+    {%~ elseif fieldData.type == 'date' %}
                           <div class="row mb-3">
                             <div class="col-12 col-md-2 text-start text-md-end">
                               <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
                             </div>
                             <div class="col-12 col-md-9">
-                              <?= $this->Form->control('{{ field }}', ['label' => false, 'class' => 'form-control', {% if fieldData.null %}'empty' => true, {% endif %}'templates' => $containerLess]) ?>
+                              <?= $this->Input->date('{{ field }}') ?>
+                            </div>
+                          </div>
+    {%~ elseif fieldData.type == 'time' %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Input->time('{{ field }}') ?>
+                            </div>
+                          </div>
+    {%~ elseif fieldData.type in ['datetime', 'timestamp'] %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Input->datetime('{{ field }}') ?>
                             </div>
                           </div>
     {%~ elseif isEmail %}
@@ -91,7 +106,7 @@
                               <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
                             </div>
                             <div class="col-12 col-md-9">
-                              <?= $this->Form->control('{{ field }}', ['label' => false, 'type' => 'email', 'class' => 'form-control', 'templates' => $containerLess]) ?>
+                              <?= $this->Input->control('{{ field }}', ['type' => 'email', 'class' => 'form-control']) ?>
                             </div>
                           </div>
     {%~ elseif isCurrency or fieldData.type in ['decimal', 'float', 'integer', 'biginteger', 'smallinteger', 'tinyinteger'] %}
@@ -100,7 +115,7 @@
                               <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
                             </div>
                             <div class="col-12 col-md-9">
-                              <?= $this->Form->control('{{ field }}', ['label' => false, 'type' => 'text', 'class' => 'form-control', 'templates' => $containerLess]) ?>
+                              <?= $this->Input->control('{{ field }}', ['type' => 'text', 'class' => 'form-control']) ?>
                             </div>
                           </div>
     {%~ else %}
@@ -109,7 +124,7 @@
                               <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
                             </div>
                             <div class="col-12 col-md-9">
-                              <?= $this->Form->control('{{ field }}', ['label' => false, 'class' => 'form-control',{% if loop.first %} 'autofocus' => true,{% endif %} 'templates' => $containerLess]) ?>
+                              <?= $this->Input->control('{{ field }}', ['class' => 'form-control'{% if loop.first %}, 'autofocus' => true{% endif %}]) ?>
                             </div>
                           </div>
     {%~ endif %}
@@ -121,7 +136,7 @@
                               <?= $this->Form->label('{{ assocData.property }}._ids', __('{{ assocName|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
                             </div>
                             <div class="col-12 col-md-9">
-                              <?= $this->Form->control('{{ assocData.property }}._ids', ['label' => false, 'options' => ${{ assocData.variable }}, 'multiple' => true, 'class' => 'form-select', 'data-tom-select' => true, 'templates' => $containerLess]) ?>
+                              <?= $this->Input->control('{{ assocData.property }}._ids', ['options' => ${{ assocData.variable }}, 'multiple' => true, 'class' => 'form-select', 'data-tom-select' => true]) ?>
                             </div>
                           </div>
     {%~ endfor %}
@@ -154,7 +169,7 @@
                                 <?= $this->Form->label('pos', __('Pos') . ':', ['class' => 'form-control-label fw-bold']) ?>
                               </div>
                               <div class="col-12 col-md-9">
-                                <?= $this->Form->control('pos', ['label' => false, 'type' => 'text', 'class' => 'form-control', 'data-number-spinner' => true, 'data-integer' => '1', 'inputmode' => 'numeric', 'min' => '0', 'step' => (string)$posStep, 'autocomplete' => 'off', 'placeholder' => '0', 'templates' => $containerLess]) ?>
+                                <?= $this->Input->control('pos', ['type' => 'text', 'class' => 'form-control', 'data-number-spinner' => true, 'data-integer' => '1', 'inputmode' => 'numeric', 'min' => '0', 'step' => (string)$posStep, 'autocomplete' => 'off', 'placeholder' => '0']) ?>
                               </div>
                             </div>
 {% endif %}

@@ -39,14 +39,29 @@
 
   ready(() => {
     init();
+
     const last = document.querySelector('table.table-data2 tbody tr.is-last-touched');
     if (!last) {
       return;
     }
 
+    const tbody = last.parentElement;
+    if (!tbody) {
+      return;
+    }
+
+    const rows = Array.from(tbody.querySelectorAll(':scope > tr'));
+    const index = rows.indexOf(last);
+    // Az oldal első 10 sora már látszik — ne görgessünk.
+    if (index < 0 || index < 10) {
+      return;
+    }
+
     const header = document.querySelector('.header-desktop, .header-mobile, .header-wrap');
-    const offset = (header ? header.getBoundingClientRect().height : 64) + 16;
-    const top = last.getBoundingClientRect().top + window.pageYOffset - offset;
+    const headerH = header ? header.getBoundingClientRect().height : 64;
+    // A sor a viewport felső harmadába kerüljön (header alatt).
+    const targetY = Math.max(headerH + 16, window.innerHeight / 3);
+    const top = last.getBoundingClientRect().top + window.pageYOffset - targetY;
     window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   });
 })(window, document);

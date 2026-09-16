@@ -41,7 +41,6 @@ $showLocal['view'] = [
 
 $show = array_merge($show['view'] ?? [], $showLocal['view']);
 $relatedShow = array_merge(Configure::read('JeffAdmin.index') ?? [], []);
-$containerLess = ['inputContainer' => '{{ '{{' }}content{{ '}}' }}'];
 ?>
               <div class="row row-tight" style="margin-top: 16px;">
                 <div class="col-12 col-xxl-11">
@@ -87,7 +86,7 @@ $containerLess = ['inputContainer' => '{{ '{{' }}content{{ '}}' }}'];
                             </div>
                             <div class="col-12 col-md-9">
                               <div class="select-with-action">
-                                <?= $this->Form->control('{{ field }}', ['label' => false, 'options' => ${{ keyFields[field] }}, {% if fieldData.null %}'empty' => __('Please select'), {% endif %}'class' => 'form-select', 'data-tom-select' => true, 'disabled' => true, 'templates' => $containerLess]) ?>
+                                <?= $this->Input->control('{{ field }}', ['options' => ${{ keyFields[field] }}, {% if fieldData.null %}'empty' => __('Please select'), {% endif %}'class' => 'form-select', 'data-tom-select' => true, 'disabled' => true]) ?>
                                 <button type="button" class="btn btn-outline-secondary select-with-action__btn" disabled aria-label="<?= h(__('More options')) ?>" data-bs-toggle="tooltip" data-bs-title="<?= h(__('More options')) ?>">
                                   <?= $this->Icon->outline('dots') ?>
                                 </button>
@@ -112,7 +111,34 @@ $containerLess = ['inputContainer' => '{{ '{{' }}content{{ '}}' }}'];
                               <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
                             </div>
                             <div class="col-12 col-md-9">
-                              <?= $this->Form->control('{{ field }}', ['label' => false, 'type' => 'textarea', 'rows' => 4, 'class' => 'form-control', 'disabled' => true, 'templates' => $containerLess]) ?>
+                              <?= $this->Input->control('{{ field }}', ['type' => 'textarea', 'rows' => 4, 'class' => 'form-control', 'disabled' => true]) ?>
+                            </div>
+                          </div>
+    {%~ elseif fieldData.type == 'date' %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Input->date('{{ field }}', ['disabled' => true]) ?>
+                            </div>
+                          </div>
+    {%~ elseif fieldData.type == 'time' %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Input->time('{{ field }}', ['disabled' => true]) ?>
+                            </div>
+                          </div>
+    {%~ elseif fieldData.type in ['datetime', 'timestamp'] %}
+                          <div class="row mb-3">
+                            <div class="col-12 col-md-2 text-start text-md-end">
+                              <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
+                            </div>
+                            <div class="col-12 col-md-9">
+                              <?= $this->Input->datetime('{{ field }}', ['disabled' => true]) ?>
                             </div>
                           </div>
     {%~ elseif isEmail %}
@@ -121,7 +147,7 @@ $containerLess = ['inputContainer' => '{{ '{{' }}content{{ '}}' }}'];
                               <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
                             </div>
                             <div class="col-12 col-md-9">
-                              <?= $this->Form->control('{{ field }}', ['label' => false, 'type' => 'email', 'class' => 'form-control', 'disabled' => true, 'templates' => $containerLess]) ?>
+                              <?= $this->Input->control('{{ field }}', ['type' => 'email', 'class' => 'form-control', 'disabled' => true]) ?>
                             </div>
                           </div>
     {%~ elseif isCurrency or fieldData.type in ['decimal', 'float', 'integer', 'biginteger', 'smallinteger', 'tinyinteger'] %}
@@ -130,7 +156,7 @@ $containerLess = ['inputContainer' => '{{ '{{' }}content{{ '}}' }}'];
                               <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
                             </div>
                             <div class="col-12 col-md-9">
-                              <?= $this->Form->control('{{ field }}', ['label' => false, 'type' => 'text', 'class' => 'form-control', 'disabled' => true, 'templates' => $containerLess]) ?>
+                              <?= $this->Input->control('{{ field }}', ['type' => 'text', 'class' => 'form-control', 'disabled' => true]) ?>
                             </div>
                           </div>
     {%~ else %}
@@ -139,7 +165,7 @@ $containerLess = ['inputContainer' => '{{ '{{' }}content{{ '}}' }}'];
                               <?= $this->Form->label('{{ field }}', __('{{ field|humanize }}') . ':', ['class' => 'form-control-label fw-bold']) ?>
                             </div>
                             <div class="col-12 col-md-9">
-                              <?= $this->Form->control('{{ field }}', ['label' => false, 'class' => 'form-control', 'disabled' => true, 'templates' => $containerLess]) ?>
+                              <?= $this->Input->control('{{ field }}', ['class' => 'form-control', 'disabled' => true]) ?>
                             </div>
                           </div>
     {%~ endif %}
@@ -172,7 +198,7 @@ $containerLess = ['inputContainer' => '{{ '{{' }}content{{ '}}' }}'];
                                 <?= $this->Form->label('pos', __('Pos') . ':', ['class' => 'form-control-label fw-bold']) ?>
                               </div>
                               <div class="col-12 col-md-9">
-                                <?= $this->Form->control('pos', ['label' => false, 'type' => 'text', 'class' => 'form-control', 'data-number-spinner' => true, 'data-integer' => '1', 'inputmode' => 'numeric', 'min' => '0', 'step' => (string)$posStep, 'autocomplete' => 'off', 'placeholder' => '0', 'disabled' => true, 'templates' => $containerLess]) ?>
+                                <?= $this->Input->control('pos', ['type' => 'text', 'class' => 'form-control', 'data-number-spinner' => true, 'data-integer' => '1', 'inputmode' => 'numeric', 'min' => '0', 'step' => (string)$posStep, 'autocomplete' => 'off', 'placeholder' => '0', 'disabled' => true]) ?>
                               </div>
                             </div>
 {% endif %}
@@ -290,13 +316,13 @@ $containerLess = ['inputContainer' => '{{ '{{' }}content{{ '}}' }}'];
 <?php if (!empty($relatedShow['created']) || !empty($relatedShow['modified'])) : ?>
                                   <td class="datetime created-modified">
 <?php     if (!empty($relatedShow['created'])) : ?>
-                                    <span class="created"><?= h(${{ otherSingularVar }}->created) ?></span>
+                                    <span class="created"><?= $this->Input->formatDatetime(${{ otherSingularVar }}->created) ?></span>
 <?php     endif; ?>
 <?php     if (!empty($relatedShow['created']) && !empty($relatedShow['modified'])) : ?>
                                     <br>
 <?php     endif; ?>
 <?php     if (!empty($relatedShow['modified'])) : ?>
-                                    <span class="modified"><?= h(${{ otherSingularVar }}->modified) ?></span>
+                                    <span class="modified"><?= $this->Input->formatDatetime(${{ otherSingularVar }}->modified) ?></span>
 <?php     endif; ?>
                                   </td>
 <?php endif; ?>
