@@ -114,6 +114,14 @@ body.app .navbar-sidebar .navbar__list .navbar__sub-list li > a.active {
   background-color: #f0f1f3 !important;
 }
 
+/* Legördülők (Related tables, Tom Select) ne vágódjanak le a card szélén */
+body.app .card.shadow,
+body.app .card-body.form-card-body,
+body.app .card-header.form-card-header,
+body.app .card-header.index-card-header {
+  overflow: visible;
+}
+
 body.app .cover-card__footer {
   margin-top: 0px;
   border-top: 1px solid lightgray;
@@ -639,6 +647,16 @@ body.app .card-header.form-card-header .form-card-header__tabs .nav-link.dropdow
 body.app .card-header.form-card-header .form-card-header__tabs .nav-item.dropdown .dropdown-menu {
   z-index: 1060;
   margin-top: 2px;
+}
+
+body.app .card-header.index-card-header .index-card-header__tabs .nav-item.dropdown .dropdown-menu {
+  z-index: 1060;
+  margin-top: 2px;
+}
+
+/* Tom Select lista a body-n — card magasságától függetlenül */
+body.app .ts-dropdown {
+  z-index: 2000;
 }
 
 /* Index lista — bal cím, jobb: fülek + Új gomb; fül alja a card-body tetejéhez ér */

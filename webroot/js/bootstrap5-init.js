@@ -10,6 +10,22 @@ ready(() => {
   $$('[data-bs-toggle="tooltip"]').forEach((el) => new bootstrap.Tooltip(el));
   $$('[data-bs-toggle="popover"]').forEach((el) => new bootstrap.Popover(el));
 
+  // Card header Related tables dropdown — fixed strategy, ne vágja le a card
+  $$('.form-card-header [data-bs-toggle="dropdown"], .index-card-header [data-bs-toggle="dropdown"]').forEach((el) => {
+    const existing = bootstrap.Dropdown.getInstance(el);
+    if (existing) {
+      existing.dispose();
+    }
+    new bootstrap.Dropdown(el, {
+      popperConfig(defaultConfig) {
+        return {
+          ...defaultConfig,
+          strategy: 'fixed',
+        };
+      },
+    });
+  });
+
   // Custom file picker — show selected filename
   $$('.file-picker__input').forEach((input) => {
     const nameEl = input.closest('.file-picker')?.querySelector('[data-file-name]');
@@ -52,6 +68,7 @@ ready(() => {
       const options = {
         create: false,
         maxOptions: null,
+        dropdownParent: 'body',
         onInitialize() {
           if (isLg) this.wrapper.classList.add('ts-wrapper--lg');
           if (isSm) this.wrapper.classList.add('ts-wrapper--sm');
