@@ -75,7 +75,7 @@ class {{ name }}Table extends Table{{ fileBuilder.classBuilder.implements ? ' im
         $this->addBehavior('{{ behavior }}'{{ (behaviorData ? (", " ~ Bake.exportArray(behaviorData, 2)|raw ~ '') : '')|raw }});
     {%~ endfor %}
 {% endif %}
-{% if associations.belongsTo or associations.hasMany or associations.belongsToMany %}
+{% if associations.belongsTo or associations.hasMany or associations.belongsToMany or associations.hasOne %}
 
     {%~ for type, assocs in associations %}
         {%~ for assoc in assocs %}
@@ -85,7 +85,18 @@ class {{ name }}Table extends Table{{ fileBuilder.classBuilder.implements ? ' im
                     {%~ set assocData = assocData|merge({(key): val}) %}
                 {%~ endif %}
             {%~ endfor %}
+            {%~ if type in ['hasMany', 'hasOne', 'belongsToMany'] %}
+        $this->{{ type }}('{{ assoc.alias }}', [
+{% for key, val in assoc %}
+    {%~ if key is not same as('alias') %}
+            '{{ key }}' => {{ Bake.exportVar(val)|raw }},
+    {%~ endif %}
+{% endfor %}
+            // 'dependent' => true, // Uncomment to cascade-delete related records when this record is deleted
+        ]);
+            {%~ else %}
         $this->{{ type }}('{{ assoc.alias }}', {{ Bake.exportArray(assocData, 2)|raw }});
+            {%~ endif %}
         {%~ endfor %}
     {%~ endfor %}
 {% endif %}

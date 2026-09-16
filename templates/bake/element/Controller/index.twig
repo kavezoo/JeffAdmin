@@ -1,6 +1,9 @@
 {#
 /**
  * JeffAdmin — Controller index (aktív header kereső + session).
+ *
+ * BelongsTo keresés: leftJoinWith() asszociaciónként string alias
+ * (tömb TypeError CakePHP 5-ben).
  */
 #}
 {%- set belongsTo = Bake.aliasExtractor(modelObj, 'BelongsTo') -%}
@@ -10,7 +13,26 @@
 {%- else -%}
     {%- set pkField = pk -%}
 {%- endif -%}
-{%- set tableSchema = modelObj.getSchema() %}
+{%- set tableSchema = modelObj.getSchema() -%}
+{%- set searchOwn = [] -%}
+{%- for column in tableSchema.columns() -%}
+    {%- set colType = tableSchema.getColumnType(column) -%}
+    {%- if colType in ['string', 'text'] and column != pkField -%}
+        {%- set searchOwn = searchOwn|merge([column]) -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- set searchBelongs = [] -%}
+{%- for assoc in belongsTo -%}
+    {%- set assocObj = modelObj.getAssociation(assoc) -%}
+    {%- set assocDisplay = assocObj.getDisplayField() -%}
+    {%- if assocDisplay is iterable -%}
+        {%- set assocDisplay = assocDisplay[0]|default(null) -%}
+    {%- endif -%}
+    {%- if assocDisplay -%}
+        {%- set searchBelongs = searchBelongs|merge([{ 'alias': assoc, 'field': assocDisplay }]) -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- set hasSearchFields = searchOwn or searchBelongs %}
     /**
      * Index method
      *
@@ -30,31 +52,28 @@
 
         // Header kereső (?search=) — sessionből a JeffAdmin AppController állítja vissza.
         $search = trim((string)$this->request->getQuery('search', ''));
+{% if hasSearchFields %}
         if ($search !== '') {
             $parts = preg_split('/\s+/u', $search, -1, PREG_SPLIT_NO_EMPTY) ?: [];
             $like = '%' . implode('%', $parts) . '%';
 
             $query
-{% if belongsTo %}
-                ->leftJoinWith({{ Bake.exportArray(belongsTo)|raw }})
-{% endif %}
+{% for item in searchBelongs %}
+                ->leftJoinWith('{{ item.alias }}')
+{% endfor %}
                 ->where([
                     'OR' => [
-{% for column in tableSchema.columns() %}
-    {%~ set colType = tableSchema.getColumnType(column) %}
-    {%~ if colType in ['string', 'text'] and column != pkField %}
+{% for column in searchOwn %}
                         '{{ currentModelName }}.{{ column }} LIKE' => $like,
-    {%~ endif %}
 {% endfor %}
-{% for assoc in belongsTo %}
-    {%~ set assocObj = modelObj.getAssociation(assoc) %}
-    {%~ set assocDisplay = assocObj.getDisplayField() %}
-                        '{{ assoc }}.{{ assocDisplay }} LIKE' => $like,
+{% for item in searchBelongs %}
+                        '{{ item.alias }}.{{ item.field }} LIKE' => $like,
 {% endfor %}
                     ],
                 ])
                 ->distinct(['{{ currentModelName }}.{{ pkField }}']);
         }
+{% endif %}
 
         ${{ pluralName }} = $this->paginate($query);
 

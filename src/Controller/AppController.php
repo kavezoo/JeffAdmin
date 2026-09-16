@@ -34,8 +34,8 @@ class AppController extends BaseController
         $this->set('controller', $this->controller);
         $this->set('action', $this->action);
 
-        // Beállítja a /jeff_admin/templates/layout/default.php fájlt alapértelmezettnek
-        $this->viewBuilder()->setLayout('KvAdmin.default');
+        // Beállítja a JeffAdmin layoutot (plugin templates/layout/default.php).
+        $this->viewBuilder()->setLayout('JeffAdmin.default');
     }
 
     public function beforeFilter(EventInterface $event): void

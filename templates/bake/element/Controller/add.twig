@@ -4,7 +4,7 @@
  */
 #}
 {% set belongsTo = Bake.aliasExtractor(modelObj, 'BelongsTo') %}
-{% set belongsToMany = Bake.aliasExtractor(modelObj, 'belongsToMany') %}
+{% set belongsToMany = Bake.aliasExtractor(modelObj, 'BelongsToMany') %}
 {% set compact = ["'#{singularName}'"] %}
     /**
      * Add method

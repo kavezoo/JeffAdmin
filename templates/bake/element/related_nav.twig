@@ -1,13 +1,23 @@
 {#
 /**
- * JeffAdmin bake — kapcsolt táblák dropdown + Settings fül a card header tabs-ban.
+ * JeffAdmin bake — kapcsolt táblák dropdown (+ opcionális Settings fül).
  *
  * Settings előtt jelenik meg (Settings marad az utolsó fül).
  * Csak akkor van Related fül, ha van közvetlen asszociáció (navLink).
- * Változók: associations, fields (Bake View context)
+ *
+ * View / element data:
+ * - associations, fields (Bake context)
+ * - withSettings (default true) — index: false
+ * - relatedMsAuto (default true) — index: false (a jobb oldali wrapper igazít)
  */
 #}
-{%- set hasSettingsTab = ('visible' in fields) or ('pos' in fields) -%}
+{%- if withSettings is not defined -%}
+    {%- set withSettings = true -%}
+{%- endif -%}
+{%- if relatedMsAuto is not defined -%}
+    {%- set relatedMsAuto = true -%}
+{%- endif -%}
+{%- set hasSettingsTab = withSettings and (('visible' in fields) or ('pos' in fields)) -%}
 {%- set relatedNavDone = [] -%}
 {%- set relatedNavItems = [] -%}
 {%- for type in ['BelongsTo', 'HasOne', 'HasMany', 'BelongsToMany'] -%}
@@ -24,7 +34,7 @@
     {%- endif -%}
 {%- endfor -%}
 {% if relatedNavItems %}
-                        <li class="nav-item dropdown ms-auto" role="presentation">
+                        <li class="nav-item dropdown{% if relatedMsAuto %} ms-auto{% endif %}" role="presentation">
                           <a class="nav-link dropdown-toggle" href="#" id="tab-related-btn" role="button" data-bs-toggle="dropdown" aria-expanded="false"><?= __('Related tables') ?></a>
                           <ul class="dropdown-menu" aria-labelledby="tab-related-btn">
 {% for item in relatedNavItems %}

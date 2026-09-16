@@ -3,7 +3,9 @@
  *
  * A CakePHP FormHelper::postLink() confirm opciója `data-confirm-message`
  * attribútumot és natív confirm()-ot tesz a linkre. Capture fázisban
- * elfogjuk a kattintást, és piros Swal dialógust mutatunk helyette.
+ * elfogjuk a kattintást, és Swal dialógust mutatunk helyette.
+ *
+ * Feliratok: data-swal-title / text / confirm / cancel (ActionHelper __()).
  */
 (function (window, document) {
   const RED = '#dc3545';
@@ -30,21 +32,25 @@
 
   const confirmDelete = (el) => {
     const message = el.getAttribute('data-confirm-message') || '';
+    const title = el.getAttribute('data-swal-title') || 'Are you sure?';
+    const text = el.getAttribute('data-swal-text') || message || 'This action cannot be undone.';
+    const confirmText = el.getAttribute('data-swal-confirm') || 'Yes, delete it!';
+    const cancelText = el.getAttribute('data-swal-cancel') || 'Cancel';
 
     if (typeof Swal === 'undefined') {
-      return Promise.resolve(window.confirm(message || 'Biztosan törölni szeretnéd?'));
+      return Promise.resolve(window.confirm(message || title));
     }
 
     return Swal.fire({
-      title: 'Biztosan törölni szeretnéd?',
-      text: message || 'Ez a művelet nem visszavonható!',
+      title: title,
+      text: text,
       icon: 'warning',
       iconColor: RED,
       showCancelButton: true,
       focusCancel: true,
       reverseButtons: true,
-      confirmButtonText: 'Igen, töröld!',
-      cancelButtonText: 'Mégse',
+      confirmButtonText: confirmText,
+      cancelButtonText: cancelText,
       confirmButtonColor: RED,
       cancelButtonColor: GRAY,
       customClass: {
@@ -66,7 +72,7 @@
     'click',
     (event) => {
       const el = event.target.closest('[data-confirm-message]');
-      if (!el) {
+      if (!el || el.classList.contains('is-disabled') || el.getAttribute('aria-disabled') === 'true') {
         return;
       }
 

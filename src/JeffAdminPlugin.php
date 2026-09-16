@@ -32,6 +32,12 @@ class JeffAdminPlugin extends BasePlugin
     {
         Configure::load('JeffAdmin.show', 'default');
 
+        // Bake theme: hostnak nem kell külön Configure::write('Bake.theme', …),
+        // ha még nincs más theme beállítva.
+        if (Configure::read('Bake.theme') === null) {
+            Configure::write('Bake.theme', 'JeffAdmin');
+        }
+
         // Icon helper automatikusan — a host AppView-ba nem kell semmit írni.
         EventManager::instance()->on(
             'Controller.initialize',

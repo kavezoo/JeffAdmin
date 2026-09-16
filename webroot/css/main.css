@@ -111,7 +111,7 @@ body.app .navbar-sidebar .navbar__list .navbar__sub-list li > a.active {
 
 .card-header,
 .card-footer {
-  background-color: #f7f7f7 !important;
+  background-color: #f0f1f3 !important;
 }
 
 body.app .cover-card__footer {
@@ -452,6 +452,22 @@ body.app .table-data-feature .item.delete:hover {
   border-color: var(--m-danger);
 }
 
+body.app .table-data-feature .item.delete.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: auto;
+  border-color: transparent;
+}
+
+body.app .table-data-feature .item.delete.is-disabled:hover {
+  border-color: transparent;
+  background: transparent;
+}
+
+body.app .table-data-feature .item.delete.is-disabled .icon {
+  color: #9aa0a6 !important;
+}
+
 /* Record link — szülő rekord; szöveg + link-chain jobbra, hoverre fekete ikon */
 body.app .record-link {
   display: inline-flex;
@@ -567,8 +583,10 @@ body.app .card-header.form-card-header {
   align-items: flex-end;
   gap: 8px;
   position: relative;
+  z-index: 5;
   padding: 12px 20px 0;
   border-bottom: 1px solid var(--m-border, #e4e7ec);
+  background-color: #f0f1f3;
 }
 
 body.app .card-header.form-card-header .form-card-header__title {
@@ -619,8 +637,81 @@ body.app .card-header.form-card-header .form-card-header__tabs .nav-link.dropdow
 }
 
 body.app .card-header.form-card-header .form-card-header__tabs .nav-item.dropdown .dropdown-menu {
-  z-index: 1055;
+  z-index: 1060;
   margin-top: 2px;
+}
+
+/* Index lista — bal cím, jobb: fülek + Új gomb; fül alja a card-body tetejéhez ér */
+body.app .card > .card-header.index-card-header,
+body.app .card-header.index-card-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  position: relative;
+  z-index: 5;
+  padding: 12px 20px 0;
+  border-bottom: 1px solid var(--m-border, #e4e7ec);
+  background-color: #f0f1f3;
+}
+
+body.app .card-header.index-card-header .index-card-header__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  align-self: center;
+  padding-bottom: 10px;
+  line-height: 1.25;
+}
+
+body.app .card-header.index-card-header .index-card-header__tabs.nav-tabs.card-header-tabs {
+  flex: 0 0 auto;
+  margin: 0;
+  margin-bottom: -1px;
+  border-bottom: 0;
+}
+
+body.app .card-header.index-card-header .index-card-header__tabs .nav-link {
+  color: #9aa0a6;
+  border: 1px solid #e0e0e0;
+  border-bottom-color: transparent;
+  background-color: transparent;
+}
+
+body.app .card-header.index-card-header .index-card-header__tabs .nav-link:hover {
+  color: var(--m-text, #1f2937);
+  border-color: #d0d0d0;
+  border-bottom-color: transparent;
+}
+
+body.app .card-header.index-card-header .index-card-header__tabs .nav-link.dropdown-toggle.show {
+  color: var(--m-text, #1f2937);
+  background-color: var(--m-surface, #fff);
+  border-color: var(--bs-border-color, #dee2e6);
+}
+
+body.app .card-header.index-card-header .index-card-header__tabs .nav-item.dropdown .dropdown-menu {
+  z-index: 1060;
+  margin-top: 2px;
+}
+
+body.app .card-header.index-card-header .index-card-header__actions {
+  flex: 0 0 auto;
+  align-self: center;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 991.98px) {
+  body.app .card-header.index-card-header {
+    flex-wrap: wrap;
+  }
+
+  body.app .card-header.index-card-header .index-card-header__title {
+    width: 100%;
+    padding-bottom: 4px;
+  }
+
+  body.app .card-header.index-card-header .index-card-header__tabs.nav-tabs.card-header-tabs {
+    margin-left: auto;
+  }
 }
 
 body.app .card-header.form-card-header .form-card-header__close {

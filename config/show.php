@@ -54,6 +54,8 @@ return [
 			'saveButton' 	=> true,
 			// Mégse: visszalépés a listára, mentés nélkül.
 			'cancelButton' 	=> true,
+			// Törlés gomb (jobbra, danger) — *_count > 0 esetén disabled; SWAL confirm.
+			'deleteButton' 	=> true,
 			// pos mező number spinner lépésköze (alap: 10).
 			'posStep' 		=> 10,
 		],
@@ -74,6 +76,8 @@ return [
 			'editButton' 	=> true,
 			// Vissza / mégsem: visszalépés a listára.
 			'cancelButton' 	=> true,
+			// Törlés gomb (jobbra, danger) — *_count > 0 esetén disabled.
+			'deleteButton' 	=> true,
 			// Kapcsolódó táblák (hasMany / belongsToMany) listája a rekord alatt.
 			'relatedTables'	=> true,
 			// pos mező number spinner lépésköze (disabled mezőn is, alap: 10).

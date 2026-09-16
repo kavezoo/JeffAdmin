@@ -87,12 +87,15 @@ if ($rowDblClick !== 'none') {
               <div class="row row-tight" style="margin-top: 16px;">
                 <div class="col-md-12">
                   <div class="card shadow" aria-labelledby="{{ pluralVar }}-title">
-                    <div class="card-header border-bottom d-flex align-items-center justify-content-between">
-                      <div>
+                    <div class="card-header index-card-header">
+                      <div class="index-card-header__title">
                         <strong id="{{ pluralVar }}-title"><?= __('{{ pluralHumanName }}') ?></strong>
                         <small class="d-block"><?= __('All {{ pluralHumanName|lower }}') ?></small>
                       </div>
-                      <div class="table-data__tool-right">
+                      <ul class="nav nav-tabs card-header-tabs index-card-header__tabs" id="indexTabs" role="tablist">
+{{ element('Bake.related_nav', {'withSettings': false, 'relatedMsAuto': false}) }}
+                      </ul>
+                      <div class="index-card-header__actions">
                         <?= $this->Html->link(
                             $this->Icon->outline('plus') . ' ' . __('Add new {{ singularHumanName|lower }}'),
                             ['action' => 'add'],
@@ -101,7 +104,7 @@ if ($rowDblClick !== 'none') {
                       </div>
                     </div>
 
-                    <div class="card-body p-0 pt-2">
+                    <div class="card-body p-0">
                       <div class="table-responsive text-nowrap">
                         <table class="table table-data2 table-border table-hover table-striped table-custom-hover mb-0"<?= $tableAttrs ?>>
                           <thead>
@@ -359,7 +362,7 @@ if ($rowDblClick !== 'none') {
                                   <?= $this->Action->edit({{ pk|raw }}) ?>
 <?php     endif; ?>
 <?php     if (!empty($show['deleteButton'])) : ?>
-                                  <?= $this->Action->delete({{ pk|raw }}) ?>
+                                  <?= $this->Action->delete({{ pk|raw }}, [], ['entity' => ${{ singularVar }}]) ?>
 <?php     endif; ?>
                                 </div>
                               </td>

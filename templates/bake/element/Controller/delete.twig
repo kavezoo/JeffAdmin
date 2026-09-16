@@ -1,16 +1,6 @@
 {#
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
- * @since         2.0.0
- * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ * JeffAdmin — Controller delete (*_count védelem + Flash).
  */
 #}
     /**
@@ -27,6 +17,13 @@
 {% if Bake.hasPlugin('Authorization') %}
         $this->Authorization->authorize(${{ singularName }});
 {% endif %}
+        foreach (${{ singularName }}->toArray() as $field => $value) {
+            if (is_string($field) && str_ends_with($field, '_count') && (int)$value > 0) {
+                $this->Flash->error(__('Cannot delete: related records exist'));
+
+                return $this->redirect(['action' => 'index']);
+            }
+        }
         if ($this->{{ currentModelName }}->delete(${{ singularName }})) {
             $this->Flash->success({% if plugin %}__d('{{ plugin }}', {% else %}__({% endif %}'The {{ singularHumanName|lower }} has been deleted.'));
         } else {
