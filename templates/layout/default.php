@@ -37,19 +37,12 @@
   <body class="app"><a class="visually-hidden-focusable skip-link" href="#main-content">Skip to main content</a>
     <div class="page-wrapper">
       
-	  <?= $this->element('JeffAdmin.header_top') ?>
+	  <?= $this->Layout->element('header_top') ?>
 	  
-      <aside class="menu-sidebar" id="main-sidebar">
-        <div class="logo"><a class="logo-link" href="index.html" aria-label="CoolAdmin home"><span class="logo-mark" aria-hidden="true">J</span><span class="logo-text">NEW JeffAdmin</span></a>
-          <button class="sidebar-close js-sidebar-toggle" type="button" aria-label="Close navigation"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-        </div>
-        <div class="menu-sidebar__content js-scrollbar1">
-		  <?= $this->element('JeffAdmin.nav') ?>
-        </div>
-      </aside>
+      <?= $this->Layout->element('aside') ?>
       <div class="page-container">
 	  
-        <?= $this->element('JeffAdmin.header') ?>
+        <?= $this->Layout->element('header') ?>
 		
         <main class="main-content" id="main-content">
           <div class="section__content section__content--p30">
@@ -94,7 +87,7 @@
 
 <?= $this->fetch('content') ?>
 
-              <?= $this->element('JeffAdmin.footer') ?>
+              <?= $this->Layout->element('footer') ?>
 
             </div>
           </div>

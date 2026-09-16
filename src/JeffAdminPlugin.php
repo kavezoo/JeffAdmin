@@ -52,6 +52,7 @@ class JeffAdminPlugin extends BasePlugin
                 $controller->viewBuilder()->addHelper('JeffAdmin.Action');
                 $controller->viewBuilder()->addHelper('JeffAdmin.Format');
                 $controller->viewBuilder()->addHelper('JeffAdmin.Input');
+                $controller->viewBuilder()->addHelper('JeffAdmin.Layout');
             }
         );
     }
