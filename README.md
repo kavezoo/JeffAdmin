@@ -240,3 +240,5 @@ If `composer.json` pins an exact version, widen the constraint (e.g. `^0.0.12`) 
 MIT — see [LICENSE](LICENSE).
 
 Enjoy JeffAdmin!
+
+<p style="text-align: right; font-style: italic;">Jeff Shoemaker</p>
