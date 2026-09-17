@@ -83,11 +83,11 @@
                 $query->where([
                     'OR' => [
 {% for column in searchOwn %}
-    {%- if column == primarySearch %}
+{% if column == primarySearch %}
                         '{{ currentModelName }}.{{ column }} LIKE' => $like,
-    {%- else %}
+{% else %}
                         // '{{ currentModelName }}.{{ column }} LIKE' => $like,
-    {%- endif %}
+{% endif %}
 {% endfor %}
 {% for item in searchBelongs %}
                         // '{{ item.alias }}.{{ item.field }} LIKE' => $like,

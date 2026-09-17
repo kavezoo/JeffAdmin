@@ -1,6 +1,6 @@
 # JeffAdmin
 
-**Version:** 1.0.7
+**Version:** 1.0.8
 
 JeffAdmin is a CakePHP 5 admin UI plugin: layout, assets, view helpers, display switches, and a Bake theme that generates list, form, and view screens in one consistent look.
 
