@@ -1,8 +1,6 @@
 # JeffAdmin
 
-**Version:** 1.0.0
-
-**First stable release.** JeffAdmin **1.0.0** is the initial production-ready release of the plugin.
+**Version:** 1.0.4
 
 JeffAdmin is a CakePHP 5 admin UI plugin: layout, assets, view helpers, display switches, and a Bake theme that generates list, form, and view screens in one consistent look.
 
@@ -70,8 +68,8 @@ public function bootstrap(): void
 
 The plugin bootstrap:
 
-- loads `JeffAdmin.show` and `JeffAdmin.nav`
-- registers helpers: `Icon`, `Action`, `Format`, `Input`, `Layout`
+- loads `JeffAdmin.show`
+- registers helpers: `Icon`, `Action`, `Format`, `Input`
 - sets `Bake.theme` to `JeffAdmin` when no other bake theme is configured
 
 ### 2. Session (host bootstrap)
@@ -168,56 +166,22 @@ bin/cake bake controller all --prefix Member --no-test
 bin/cake bake template all --prefix Member
 ```
 
-## Sidebar menu (`JeffAdmin.nav`)
+## Sidebar & layout elements
 
-The plugin ships an **empty** sidebar. Define items in the host (e.g. `config/bootstrap.php`):
+The layout calls `$this->element('JeffAdmin.nav')` (and `header`, `header_top`, `footer` the same way).
 
-```php
-use Cake\Core\Configure;
-
-Configure::write('JeffAdmin.nav', [
-    [
-        'type' => 'group',
-        'label' => 'Tables',
-        'icon' => 'fa-solid fa-table',
-        'items' => [
-            ['controller' => 'Articles', 'label' => 'Articles'],
-            ['controller' => 'Tags', 'label' => 'Tags'],
-        ],
-    ],
-    [
-        'type' => 'link',
-        'controller' => 'Dashboard',
-        'label' => 'Dashboard',
-        'icon' => 'fa-solid fa-gauge',
-    ],
-]);
-```
-
-Labels go through `__()`. Optional per-item keys: `action` (default `index`), `prefix`.
-
-## Overriding layout elements
-
-The layout loads shell elements through `Layout->element()` (prefix-first).  
-If a host file exists for the current request prefix, it is used instead of the plugin default.
-
-Checked names: `aside`, `footer`, `header`, `header_top`, `nav`.
-
-Resolution order for prefix `Admin` (example: `nav`):
+CakePHP looks under the current prefix first. If the host file exists, it wins; otherwise the plugin default is used.
 
 ```text
-templates/Admin/element/nav.php
-templates/Admin/element/plugin/JeffAdmin/nav.php
-templates/plugin/JeffAdmin/Admin/element/nav.php
-templates/plugin/JeffAdmin/element/nav.php
-plugins/JeffAdmin/templates/element/nav.php   (plugin default)
+templates/Admin/element/nav.php          ← your menu (copy & edit)
+plugins/.../templates/element/nav.php    ← plugin default
 ```
 
-For another prefix (e.g. `Member`), start from `templates/Member/element/…` the same way.
+Same pattern for `header.php`, `header_top.php`, `footer.php`.
 
-Copy a starting point from `vendor/kavezoo/jeffadmin/templates/element/` if needed.
+No bootstrap menu config. Copy `vendor/kavezoo/jeffadmin/templates/element/nav.php` to `templates/Admin/element/nav.php` and add your links.
 
-UI assets (CSS/JS, Tom Select, SweetAlert, layout) live **only** in the plugin. Do not copy `webroot` into the host — other apps get them via Composer.
+UI assets live **only** in the plugin — do not copy `webroot` into the host.
 
 ## Display switches (`$show`)
 

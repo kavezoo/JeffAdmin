@@ -31,7 +31,6 @@ class JeffAdminPlugin extends BasePlugin
     public function bootstrap(PluginApplicationInterface $app): void
     {
         Configure::load('JeffAdmin.show', 'default');
-        Configure::load('JeffAdmin.nav', 'default');
 
         // Bake theme: hostnak nem kell külön Configure::write('Bake.theme', …),
         // ha még nincs más theme beállítva.
@@ -52,7 +51,6 @@ class JeffAdminPlugin extends BasePlugin
                 $controller->viewBuilder()->addHelper('JeffAdmin.Action');
                 $controller->viewBuilder()->addHelper('JeffAdmin.Format');
                 $controller->viewBuilder()->addHelper('JeffAdmin.Input');
-                $controller->viewBuilder()->addHelper('JeffAdmin.Layout');
             }
         );
     }

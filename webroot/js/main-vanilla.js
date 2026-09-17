@@ -768,7 +768,7 @@ ready(() => {
   initSidebarTooltips();
   initResponsiveTableShadows();
   initToastSystem();
-  initCommandPalette();
+  initHeaderSearchShortcut();
   initDashboardRefresh();
 });
 
@@ -915,171 +915,23 @@ function initToastSystem() {
 }
 
 // ---------------------------------------------------------------------------
-// Command palette (Cmd+K / Ctrl+K)
-// Static list of pages + a few example actions; arrow-key navigation; Enter
-// activates; Escape or backdrop click dismisses.
+// Header search focus (Cmd+K / Ctrl+K) — no command palette modal.
 // ---------------------------------------------------------------------------
-function initCommandPalette() {
-  const COMMANDS = [
-    { section: 'Pages', title: 'Dashboard',         sub: 'Main overview',           href: 'index.html',     icon: 'fa-tachometer-alt' },
-    { section: 'Pages', title: 'Sales pipeline',    sub: 'Index 2',                 href: 'index2.html',    icon: 'fa-handshake' },
-    { section: 'Pages', title: 'Marketing analytics', sub: 'Index 3',               href: 'index3.html',    icon: 'fa-chart-line' },
-    { section: 'Pages', title: 'Projects',          sub: 'Index 4',                 href: 'index4.html',    icon: 'fa-folder-open' },
-    { section: 'Pages', title: 'Charts',            sub: 'Visualisation showcase',  href: 'chart.html',     icon: 'fa-chart-bar' },
-    { section: 'Pages', title: 'Tables',            sub: 'Data tables',             href: 'table.html',     icon: 'fa-table' },
-    { section: 'Pages', title: 'Forms',             sub: 'Inputs and validation',   href: 'form.html',      icon: 'fa-square-check' },
-    { section: 'Pages', title: 'Calendar',          sub: 'FullCalendar demo',       href: 'calendar.html',  icon: 'fa-calendar' },
-    { section: 'Pages', title: 'Maps',              sub: 'Leaflet maps',            href: 'map.html',       icon: 'fa-map-location-dot' },
-    { section: 'Pages', title: 'Inbox',             sub: 'Email + tasks',           href: 'inbox.html',     icon: 'fa-inbox' },
-    { section: 'Pages', title: 'Kanban board',      sub: 'Drag-and-drop tasks',     href: 'kanban.html',    icon: 'fa-columns' },
-    { section: 'Pages', title: 'Profile & settings', sub: 'Account preferences',    href: 'profile.html',   icon: 'fa-user-gear' },
-    { section: 'Pages', title: 'Pricing',           sub: 'Marketing pricing page',  href: 'pricing.html',   icon: 'fa-tag' },
-    { section: 'Pages', title: 'Invoice',           sub: 'Sample invoice',          href: 'invoice.html',   icon: 'fa-file-invoice' },
-    { section: 'Pages', title: 'Notifications',     sub: 'Activity log',            href: 'notifications.html', icon: 'fa-bell' },
-    { section: 'Pages', title: 'Documentation',     sub: 'Quick-start guide',       href: 'docs.html',      icon: 'fa-book' },
-    { section: 'Pages', title: 'Setup wizard',      sub: 'Multi-step form',         href: 'wizard.html',    icon: 'fa-list-ol' },
-    { section: 'Pages', title: 'Data table',        sub: 'Sortable, filterable',    href: 'data-table.html', icon: 'fa-table-list' },
-    { section: 'Components', title: 'Buttons',      sub: 'Showcase',                href: 'button.html',    icon: 'fa-square' },
-    { section: 'Components', title: 'Cards',        sub: 'Card patterns',           href: 'card.html',      icon: 'fa-id-card' },
-    { section: 'Components', title: 'Modals',       sub: 'Dialog showcase',         href: 'modal.html',     icon: 'fa-window-restore' },
-    { section: 'Components', title: 'Alerts',       sub: 'Inline alert variants',   href: 'alert.html',     icon: 'fa-bell' },
-    { section: 'Components', title: 'Badges',       sub: 'Pill labels',             href: 'badge.html',     icon: 'fa-tag' },
-    { section: 'Components', title: 'Tabs',         sub: 'Tab navigation',          href: 'tab.html',       icon: 'fa-window-maximize' },
-    { section: 'Components', title: 'Switches',     sub: 'Toggles',                 href: 'switch.html',    icon: 'fa-toggle-on' },
-    { section: 'Components', title: 'Progress bars', sub: 'Progress indicators',    href: 'progress-bar.html', icon: 'fa-tasks' },
-    { section: 'Components', title: 'Typography',   sub: 'Type scale',              href: 'typo.html',      icon: 'fa-font' },
-    { section: 'Components', title: 'Font Awesome', sub: 'Icon set',                href: 'fontawesome.html', icon: 'fa-icons' },
-    { section: 'Actions', title: 'Show success toast', sub: 'Demo a notification',  action: () => window.toast.success('Saved successfully'), icon: 'fa-circle-check' },
-    { section: 'Actions', title: 'Show error toast',   sub: 'Demo an error',        action: () => window.toast.error('Something went wrong'),  icon: 'fa-circle-xmark' },
-  ];
-
-  let overlay, input, results, activeIndex = 0, currentList = [];
-  function build() {
-    overlay = document.createElement('div');
-    overlay.className = 'cmdk-overlay';
-    overlay.setAttribute('role', 'dialog');
-    overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-label', 'Command palette');
-    overlay.innerHTML = `
-      <div class="cmdk-panel">
-        <div class="cmdk-input-wrap">
-          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-          <input class="cmdk-input" type="text" placeholder="Search pages, actions…" aria-label="Search">
-          <kbd class="cmdk-hint">esc</kbd>
-        </div>
-        <ul class="cmdk-results" role="listbox"></ul>
-        <div class="cmdk-footer">
-          <span><kbd>↑</kbd><kbd>↓</kbd> navigate · <kbd>↵</kbd> select</span>
-          <span><kbd>⌘</kbd><kbd>K</kbd> open</span>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    input = overlay.querySelector('.cmdk-input');
-    results = overlay.querySelector('.cmdk-results');
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-    input.addEventListener('input', () => render(input.value));
-    input.addEventListener('keydown', onKey);
-  }
-
-  function render(query) {
-    const q = (query || '').trim().toLowerCase();
-    const filtered = q
-      ? COMMANDS.filter(c => (c.title + ' ' + (c.sub || '')).toLowerCase().includes(q))
-      : COMMANDS;
-    currentList = filtered;
-    activeIndex = 0;
-    if (!filtered.length) {
-      results.innerHTML = '<li class="cmdk-empty">No results.</li>';
+function initHeaderSearchShortcut() {
+  document.addEventListener('keydown', (e) => {
+    if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'k') {
       return;
     }
-    const groups = new Map();
-    filtered.forEach(c => {
-      if (!groups.has(c.section)) groups.set(c.section, []);
-      groups.get(c.section).push(c);
-    });
-    let html = '';
-    let idx = 0;
-    for (const [section, items] of groups) {
-      html += `<li class="cmdk-section">${section}</li>`;
-      for (const c of items) {
-        html += `
-          <li>
-            <a class="cmdk-item${idx === activeIndex ? ' is-active' : ''}" data-idx="${idx}" ${c.href ? `href="${c.href}"` : 'href="#"'}>
-              <span class="cmdk-item__icon"><i class="fa-solid ${c.icon}" aria-hidden="true"></i></span>
-              <div class="cmdk-item__body">
-                <div class="cmdk-item__title">${escapeHtml(c.title)}</div>
-                ${c.sub ? `<div class="cmdk-item__sub">${escapeHtml(c.sub)}</div>` : ''}
-              </div>
-              <span class="cmdk-item__meta">${c.section}</span>
-            </a>
-          </li>
-        `;
-        idx++;
-      }
+    const input = document.querySelector('.header-desktop .form-header input[type="search"], .form-header input[name="search"]');
+    if (!input) {
+      return;
     }
-    results.innerHTML = html;
-    results.querySelectorAll('.cmdk-item').forEach((el, i) => {
-      el.addEventListener('click', (e) => {
-        e.preventDefault();
-        activate(currentList[i]);
-      });
-      el.addEventListener('mouseenter', () => setActive(i));
-    });
-  }
-
-  function setActive(i) {
-    activeIndex = i;
-    results.querySelectorAll('.cmdk-item').forEach((el, idx) => {
-      el.classList.toggle('is-active', idx === activeIndex);
-    });
-    const active = results.querySelector('.cmdk-item.is-active');
-    if (active) active.scrollIntoView({ block: 'nearest' });
-  }
-
-  function activate(cmd) {
-    if (!cmd) return;
-    close();
-    if (cmd.href) window.location.href = cmd.href;
-    else if (cmd.action) cmd.action();
-  }
-
-  function escapeHtml(s) {
-    const div = document.createElement('div');
-    div.textContent = String(s);
-    return div.innerHTML;
-  }
-
-  function onKey(e) {
-    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIndex + 1, currentList.length - 1)); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIndex - 1, 0)); }
-    else if (e.key === 'Enter') { e.preventDefault(); activate(currentList[activeIndex]); }
-    else if (e.key === 'Escape') { e.preventDefault(); close(); }
-  }
-
-  function open() {
-    if (!overlay) build();
-    overlay.classList.add('is-open');
-    input.value = '';
-    render('');
-    setTimeout(() => input.focus(), 50);
-  }
-  function close() {
-    if (!overlay) return;
-    overlay.classList.remove('is-open');
-  }
-
-  window.cmdk = { open, close };
-
-  document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-      e.preventDefault();
-      if (overlay && overlay.classList.contains('is-open')) close();
-      else open();
+    e.preventDefault();
+    input.focus();
+    if (typeof input.select === 'function') {
+      input.select();
     }
   });
-
-  // A header kereső mező sima GET kereső (Enter) — nem nyitja a command palette-et.
 }
 
 // Floating sidebar tooltip — only shown when the sidebar is collapsed on

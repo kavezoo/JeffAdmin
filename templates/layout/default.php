@@ -37,12 +37,12 @@
   <body class="app"><a class="visually-hidden-focusable skip-link" href="#main-content">Skip to main content</a>
     <div class="page-wrapper">
       
-	  <?= $this->Layout->element('header_top') ?>
-	  
-      <?= $this->Layout->element('aside') ?>
+	  <?= $this->element('JeffAdmin.header_top') ?>
+
+      <?= $this->element('JeffAdmin.nav') ?>
       <div class="page-container">
-	  
-        <?= $this->Layout->element('header') ?>
+
+        <?= $this->element('JeffAdmin.header') ?>
 		
         <main class="main-content" id="main-content">
           <div class="section__content section__content--p30">
@@ -87,7 +87,7 @@
 
 <?= $this->fetch('content') ?>
 
-              <?= $this->Layout->element('footer') ?>
+              <?= $this->element('JeffAdmin.footer') ?>
 
             </div>
           </div>
