@@ -119,7 +119,8 @@ class ActionHelper extends Helper
      *
      * Options:
      * - disabled (bool)
-     * - entity (EntityInterface) — *_count > 0 esetén disabled
+     * - entity (EntityInterface) — *_count > 0 esetén disabled (ha checkCounts nem false)
+     * - checkCounts (bool) — alap true; false = ne tiltson *_count miatt
      * - disabledTitle (string) — tooltip felülírás
      *
      * @param string|int $id Rekord id
@@ -164,7 +165,7 @@ class ActionHelper extends Helper
      *
      * @param string|int $id Rekord id
      * @param array<string, mixed> $urlOptions Extra URL opciók (pl. controller)
-     * @param array<string, mixed> $options disabled / entity / disabledTitle
+     * @param array<string, mixed> $options disabled / entity / checkCounts / disabledTitle
      */
     public function deleteButton(string|int $id, array $urlOptions = [], array $options = []): string
     {
@@ -255,11 +256,17 @@ class ActionHelper extends Helper
 
     /**
      * @param array<string, mixed> $options
+     *   disabled (bool), entity (EntityInterface), checkCounts (bool, alap: true),
+     *   disabledTitle (string)
      */
     protected function isDeleteDisabled(array $options): bool
     {
         if (!empty($options['disabled'])) {
             return true;
+        }
+
+        if (array_key_exists('checkCounts', $options) && $options['checkCounts'] === false) {
+            return false;
         }
 
         $entity = $options['entity'] ?? null;

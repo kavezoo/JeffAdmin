@@ -1,6 +1,6 @@
 # JeffAdmin
 
-**Version:** 1.0.8
+**Version:** 1.0.10
 
 JeffAdmin is a CakePHP 5 admin UI plugin: layout, assets, view helpers, display switches, and a Bake theme that generates list, form, and view screens in one consistent look.
 
@@ -207,6 +207,8 @@ $showLocal['edit'] = [
 
 $show = array_merge($show['edit'] ?? [], $showLocal['edit']);
 ```
+
+View related tabs (HasMany / BelongsToMany): section markers `Related: {Alias} (start|end)`; active columns like index (`name`/`title`, `visible`, `pos`, `created`/`modified`, actions); other fields in `/* */`. Per-table override via `$relatedLocal['Alias']` (e.g. `deleteGuardByCounts => false`). Model bake keeps `// 'dependent' => true` commented for optional cascade delete.
 
 ## Pagination (`JeffAdmin.paginate`)
 

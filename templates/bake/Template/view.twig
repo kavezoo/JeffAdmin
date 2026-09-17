@@ -42,7 +42,17 @@ $showLocal['view'] = [
 ];
 
 $show = array_merge($show['view'] ?? [], $showLocal['view']);
-$relatedShow = array_merge(Configure::read('JeffAdmin.index') ?? [], []);
+$relatedShow = array_merge(
+    ['deleteGuardByCounts' => true],
+    Configure::read('JeffAdmin.index') ?? []
+);
+// Kapcsolt tábla felülírás asszociáció alias szerint (pl. 'Items'):
+$relatedLocal = [
+//    'Items' => [
+//        'deleteGuardByCounts' => false, // *_count ne tiltsa a törlést
+//        // 'deleteButton' => false,
+//    ],
+];
 ?>
               <div class="row row-tight" style="margin-top: 16px;">
                 <div class="col-12 col-xxl-11">
@@ -250,46 +260,79 @@ $relatedShow = array_merge(Configure::read('JeffAdmin.index') ?? [], []);
     {%~ if otherSingularVar == singularVar %}
         {%~ set otherSingularVar = otherSingularVar ~ 'Related' %}
     {%~ endif %}
+    {%~ set relatedSecret = ['password', 'passwords', 'passwd', 'token'] -%}
+    {%~ set relatedSpecial = ['id', 'visible', 'pos', 'created', 'modified'] -%}
+    {%~ set relatedDisplay = details.displayField -%}
+    {%~ if relatedDisplay is iterable -%}
+        {%~ set relatedDisplay = relatedDisplay[0]|default(null) -%}
+    {%~ endif -%}
+    {%~ set relatedTitleField = null -%}
+    {%~ if 'name' in details.fields -%}
+        {%~ set relatedTitleField = 'name' -%}
+    {%~ elseif 'title' in details.fields -%}
+        {%~ set relatedTitleField = 'title' -%}
+    {%~ elseif relatedDisplay and relatedDisplay in details.fields and relatedDisplay not in relatedSpecial and relatedDisplay not in relatedSecret and not (relatedDisplay ends with '_count') -%}
+        {%~ set relatedTitleField = relatedDisplay -%}
+    {%~ endif -%}
+    {%~ set relatedOtherFields = [] -%}
+    {%~ for field in details.fields -%}
+        {%~ if field not in relatedSpecial and field != relatedTitleField and field not in relatedSecret and not (field ends with '_count') -%}
+            {%~ set relatedOtherFields = relatedOtherFields|merge([field]) -%}
+        {%~ endif -%}
+    {%~ endfor -%}
+    {%~ set otherPk = '$' ~ otherSingularVar ~ '->' ~ details.primaryKey[0] %}
+                        <?php // ========== Related: {{ alias }} (start) ========== ?>
                         <div class="tab-pane fade{% if loop.first %} show active{% endif %}" id="related-tab-{{ details.property }}" role="tabpanel" aria-labelledby="related-tab-{{ details.property }}-btn" tabindex="0">
+                          <?php
+                          $relShow = array_merge($relatedShow, $relatedLocal['{{ alias }}'] ?? []);
+                          ?>
                           <div class="table-responsive text-nowrap">
                             <table class="table table-data2 table-border table-hover table-striped table-custom-hover mb-0">
                               <thead>
                                 <tr>
-{% for field in details.fields %}
-    {%~ if field in ['password', 'passwords', 'passwd', 'token'] %}
-    {%~ elseif field == 'id' %}
-<?php if (!empty($relatedShow['rowId'])) : ?>
+{% if 'id' in details.fields %}
+<?php if (!empty($relShow['rowId'])) : ?>
                                   <th class="integer id-col"><?= __('Id') ?></th>
 <?php endif; ?>
-    {%~ elseif field == 'visible' %}
-<?php if (!empty($relatedShow['visible'])) : ?>
+{% endif %}
+{% if relatedTitleField %}
+<?php if (!empty($relShow['name'])) : ?>
+                                  <th class="string"><?= __('{{ relatedTitleField|humanize }}') ?></th>
+<?php endif; ?>
+{% endif %}
+{% if relatedOtherFields %}
+<?php /*
+{% for field in relatedOtherFields %}
+                                  <th class="string"><?= __('{{ field|humanize }}') ?></th>
+{% endfor %}
+*/ ?>
+{% endif %}
+{% if 'visible' in details.fields %}
+<?php if (!empty($relShow['visible'])) : ?>
                                   <th class="boolean"><?= __('Visible') ?></th>
 <?php endif; ?>
-    {%~ elseif field == 'pos' %}
-<?php if (!empty($relatedShow['pos'])) : ?>
+{% endif %}
+{% if 'pos' in details.fields %}
+<?php if (!empty($relShow['pos'])) : ?>
                                   <th class="integer pos"><?= __('Pos') ?></th>
 <?php endif; ?>
-    {%~ elseif field in ['created', 'modified'] %}
-    {%~ else %}
-                                  <th class="string"><?= __('{{ field|humanize }}') ?></th>
-    {%~ endif %}
-{% endfor %}
+{% endif %}
 {% if 'created' in details.fields or 'modified' in details.fields %}
-<?php if (!empty($relatedShow['created']) || !empty($relatedShow['modified'])) : ?>
+<?php if (!empty($relShow['created']) || !empty($relShow['modified'])) : ?>
                                   <th class="datetime-meta">
-<?php     if (!empty($relatedShow['created'])) : ?>
+<?php     if (!empty($relShow['created'])) : ?>
                                     <?= __('Created') ?>
 <?php     endif; ?>
-<?php     if (!empty($relatedShow['created']) && !empty($relatedShow['modified'])) : ?>
+<?php     if (!empty($relShow['created']) && !empty($relShow['modified'])) : ?>
                                     <br>
 <?php     endif; ?>
-<?php     if (!empty($relatedShow['modified'])) : ?>
+<?php     if (!empty($relShow['modified'])) : ?>
                                     <?= __('Modified') ?>
 <?php     endif; ?>
                                   </th>
 <?php endif; ?>
 {% endif %}
-<?php if (!empty($relatedShow['viewButton']) || !empty($relatedShow['editButton']) || !empty($relatedShow['deleteButton'])) : ?>
+<?php if (!empty($relShow['viewButton']) || !empty($relShow['editButton']) || !empty($relShow['deleteButton'])) : ?>
                                   <th class="action"><?= __('Actions') ?></th>
 <?php endif; ?>
                                 </tr>
@@ -297,52 +340,62 @@ $relatedShow = array_merge(Configure::read('JeffAdmin.index') ?? [], []);
                               <tbody class="table-group-divider">
 <?php foreach (${{ singularVar }}->{{ details.property }} as ${{ otherSingularVar }}) : ?>
                                 <tr data-id="<?= h((string)${{ otherSingularVar }}->{{ details.primaryKey[0] }}) ?>">
-{% for field in details.fields %}
-    {%~ if field in ['password', 'passwords', 'passwd', 'token'] %}
-    {%~ elseif field == 'id' %}
-<?php if (!empty($relatedShow['rowId'])) : ?>
+{% if 'id' in details.fields %}
+<?php if (!empty($relShow['rowId'])) : ?>
                                   <td class="integer id-col"><?= h((string)${{ otherSingularVar }}->id) ?></td>
 <?php endif; ?>
-    {%~ elseif field == 'visible' %}
-<?php if (!empty($relatedShow['visible'])) : ?>
+{% endif %}
+{% if relatedTitleField %}
+<?php if (!empty($relShow['name'])) : ?>
+                                  <td class="string"><?= h(${{ otherSingularVar }}->{{ relatedTitleField }}) ?></td>
+<?php endif; ?>
+{% endif %}
+{% if relatedOtherFields %}
+<?php /*
+{% for field in relatedOtherFields %}
+                                  <td class="string"><?= h(${{ otherSingularVar }}->{{ field }}) ?></td>
+{% endfor %}
+*/ ?>
+{% endif %}
+{% if 'visible' in details.fields %}
+<?php if (!empty($relShow['visible'])) : ?>
                                   <td class="boolean visible"><?= $this->Icon->boolean(${{ otherSingularVar }}->visible) ?></td>
 <?php endif; ?>
-    {%~ elseif field == 'pos' %}
-<?php if (!empty($relatedShow['pos'])) : ?>
+{% endif %}
+{% if 'pos' in details.fields %}
+<?php if (!empty($relShow['pos'])) : ?>
                                   <td class="integer pos"><?= ${{ otherSingularVar }}->pos === null ? '' : h((string)${{ otherSingularVar }}->pos) ?></td>
 <?php endif; ?>
-    {%~ elseif field in ['created', 'modified'] %}
-    {%~ else %}
-                                  <td class="string"><?= h(${{ otherSingularVar }}->{{ field }}) ?></td>
-    {%~ endif %}
-{% endfor %}
+{% endif %}
 {% if 'created' in details.fields or 'modified' in details.fields %}
-<?php if (!empty($relatedShow['created']) || !empty($relatedShow['modified'])) : ?>
+<?php if (!empty($relShow['created']) || !empty($relShow['modified'])) : ?>
                                   <td class="datetime created-modified">
-<?php     if (!empty($relatedShow['created'])) : ?>
+<?php     if (!empty($relShow['created'])) : ?>
                                     <span class="created"><?= $this->Input->formatDatetime(${{ otherSingularVar }}->created) ?></span>
 <?php     endif; ?>
-<?php     if (!empty($relatedShow['created']) && !empty($relatedShow['modified'])) : ?>
+<?php     if (!empty($relShow['created']) && !empty($relShow['modified'])) : ?>
                                     <br>
 <?php     endif; ?>
-<?php     if (!empty($relatedShow['modified'])) : ?>
+<?php     if (!empty($relShow['modified'])) : ?>
                                     <span class="modified"><?= $this->Input->formatDatetime(${{ otherSingularVar }}->modified) ?></span>
 <?php     endif; ?>
                                   </td>
 <?php endif; ?>
 {% endif %}
-{% set otherPk = '$' ~ otherSingularVar ~ '->' ~ details.primaryKey[0] %}
-<?php if (!empty($relatedShow['viewButton']) || !empty($relatedShow['editButton']) || !empty($relatedShow['deleteButton'])) : ?>
+<?php if (!empty($relShow['viewButton']) || !empty($relShow['editButton']) || !empty($relShow['deleteButton'])) : ?>
                                   <td class="action">
                                     <div class="table-data-feature">
-<?php         if (!empty($relatedShow['viewButton'])) : ?>
+<?php         if (!empty($relShow['viewButton'])) : ?>
                                       <?= $this->Action->view({{ otherPk|raw }}, ['controller' => '{{ details.controller }}']) ?>
 <?php         endif; ?>
-<?php         if (!empty($relatedShow['editButton'])) : ?>
+<?php         if (!empty($relShow['editButton'])) : ?>
                                       <?= $this->Action->edit({{ otherPk|raw }}, ['controller' => '{{ details.controller }}']) ?>
 <?php         endif; ?>
-<?php         if (!empty($relatedShow['deleteButton'])) : ?>
-                                      <?= $this->Action->delete({{ otherPk|raw }}, ['controller' => '{{ details.controller }}'], ['entity' => ${{ otherSingularVar }}]) ?>
+<?php         if (!empty($relShow['deleteButton'])) : ?>
+                                      <?= $this->Action->delete({{ otherPk|raw }}, ['controller' => '{{ details.controller }}'], [
+                                          'entity' => ${{ otherSingularVar }},
+                                          'checkCounts' => ($relShow['deleteGuardByCounts'] ?? true) !== false,
+                                      ]) ?>
 <?php         endif; ?>
                                     </div>
                                   </td>
@@ -353,6 +406,7 @@ $relatedShow = array_merge(Configure::read('JeffAdmin.index') ?? [], []);
                             </table>
                           </div>
                         </div>
+                        <?php // ========== Related: {{ alias }} (end) ========== ?>
 {% endfor %}
                       </div>
                     </div>

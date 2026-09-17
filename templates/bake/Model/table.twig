@@ -92,7 +92,7 @@ class {{ name }}Table extends Table{{ fileBuilder.classBuilder.implements ? ' im
             '{{ key }}' => {{ Bake.exportVar(val)|raw }},
     {%~ endif %}
 {% endfor %}
-            // 'dependent' => true, // Uncomment to cascade-delete related records when this record is deleted
+            // 'dependent' => true, // Kaszkád törlés: a kapcsolt rekordok is törlődnek (kapcsold be, ha kell)
         ]);
             {%~ else %}
         $this->{{ type }}('{{ assoc.alias }}', {{ Bake.exportArray(assocData, 2)|raw }});
