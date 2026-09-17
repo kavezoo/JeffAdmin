@@ -1,9 +1,11 @@
 {#
 /**
- * JeffAdmin — Controller index (aktív header kereső + session).
+ * JeffAdmin — Controller index (header kereső + session).
  *
- * BelongsTo keresés: leftJoinWith() asszociaciónként string alias
- * (tömb TypeError CakePHP 5-ben).
+ * Aktív keresőmező: name (ha nincs: title). Egyéb string / BelongsTo: kikommentelve.
+ * Több szó: minden szóra külön WHERE OR (mezők) — a szavak AND-del kapcsolódnak
+ * (bármely mezőben, bárhol megjelenhetnek, sorrend nem számít).
+ * BelongsTo: leftJoinWith() asszociaciónként string alias (tömb TypeError CakePHP 5-ben).
  */
 #}
 {%- set belongsTo = Bake.aliasExtractor(modelObj, 'BelongsTo') -%}
@@ -33,6 +35,14 @@
         {%- set searchBelongs = searchBelongs|merge([{ 'alias': assoc, 'field': assocDisplay }]) -%}
     {%- endif -%}
 {%- endfor -%}
+{%- set primarySearch = null -%}
+{%- if 'name' in searchOwn -%}
+    {%- set primarySearch = 'name' -%}
+{%- elseif 'title' in searchOwn -%}
+    {%- set primarySearch = 'title' -%}
+{%- elseif searchOwn -%}
+    {%- set primarySearch = searchOwn[0] -%}
+{%- endif -%}
 {%- set hasSearchFields = searchOwn or searchBelongs %}
     /**
      * Index method
@@ -41,6 +51,11 @@
      */
     public function index()
     {
+        // Lapozás — globális: JeffAdmin.paginate.limit / maxLimit (config/paginate.php).
+        // Helyi felülírás:
+        // $this->paginate['limit'] = 10;
+        // $this->paginate['maxLimit'] = 100;
+
 {% if belongsTo %}
         $query = $this->{{ currentModelName }}->find()
             ->contain({{ Bake.exportArray(belongsTo)|raw }});
@@ -52,27 +67,36 @@
 {% endif %}
 
         // Header kereső (?search=) — sessionből a JeffAdmin AppController állítja vissza.
+        // Aktív: name (vagy title / első string). Többi mező / BelongsTo: uncomment.
+        // Több szó: minden szóra AND; egy szón belül OR a mezőkön (bárhol, sorrend nélkül).
         $search = trim((string)$this->request->getQuery('search', ''));
-{% if hasSearchFields %}
+{% if hasSearchFields and primarySearch %}
         if ($search !== '') {
-            $parts = preg_split('/\s+/u', $search, -1, PREG_SPLIT_NO_EMPTY) ?: [];
-            $like = '%' . implode('%', $parts) . '%';
+            $words = preg_split('/\s+/u', $search, -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
-            $query
 {% for item in searchBelongs %}
-                ->leftJoinWith('{{ item.alias }}')
+            // $query->leftJoinWith('{{ item.alias }}');
 {% endfor %}
-                ->where([
+
+            foreach ($words as $word) {
+                $like = '%' . addcslashes($word, '%_\\') . '%';
+                $query->where([
                     'OR' => [
 {% for column in searchOwn %}
+    {%- if column == primarySearch %}
                         '{{ currentModelName }}.{{ column }} LIKE' => $like,
+    {%- else %}
+                        // '{{ currentModelName }}.{{ column }} LIKE' => $like,
+    {%- endif %}
 {% endfor %}
 {% for item in searchBelongs %}
-                        '{{ item.alias }}.{{ item.field }} LIKE' => $like,
+                        // '{{ item.alias }}.{{ item.field }} LIKE' => $like,
 {% endfor %}
                     ],
-                ])
-                ->distinct(['{{ currentModelName }}.{{ pkField }}']);
+                ]);
+            }
+
+            $query->distinct(['{{ currentModelName }}.{{ pkField }}']);
         }
 {% endif %}
 

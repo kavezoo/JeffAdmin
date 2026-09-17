@@ -1,6 +1,6 @@
 # JeffAdmin
 
-**Version:** 1.0.4
+**Version:** 1.0.7
 
 JeffAdmin is a CakePHP 5 admin UI plugin: layout, assets, view helpers, display switches, and a Bake theme that generates list, form, and view screens in one consistent look.
 
@@ -207,6 +207,12 @@ $showLocal['edit'] = [
 
 $show = array_merge($show['edit'] ?? [], $showLocal['edit']);
 ```
+
+## Pagination (`JeffAdmin.paginate`)
+
+Controller settings live in a **separate** file from `$show`: plugin `config/paginate.php` → `JeffAdmin.paginate.limit` / `maxLimit` (default `10` / `100`). Applied by the plugin `AppController`.
+
+Host override: `Configure::write('JeffAdmin.paginate.limit', 25)`. Per controller in `index()`: `$this->paginate['limit'] = 25`.
 
 ## Updating
 

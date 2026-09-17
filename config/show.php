@@ -1,11 +1,13 @@
 <?php
 /**
- * JeffAdmin — alapértelmezett megjelenítési kapcsolók.
+ * JeffAdmin — alapértelmezett megjelenítési kapcsolók (template / $show).
  *
  * A plugin bootstrap betölti: Configure::load('JeffAdmin.show').
  * A sablonok Configure::read('JeffAdmin')-nel olvassák, majd a saját
  * $showLocal tömbjükkel felülírhatják (csak a felülírandó kulcsokat
  * kell megadni; a többi az itt lévő alapértelmezés marad).
+ *
+ * Controller-szintű beállítások (pl. lapozás): config/paginate.php.
  *
  * Értékek:
  *   true / false — megjelenik / elrejtve

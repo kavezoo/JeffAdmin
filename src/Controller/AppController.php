@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace JeffAdmin\Controller;
 
 use App\Controller\AppController as BaseController;
+use Cake\Core\Configure;
 use Cake\Datasource\Paging\Exception\PageOutOfBoundsException;
 use Cake\Datasource\Paging\PaginatedInterface;
 use Cake\Datasource\QueryInterface;
@@ -36,6 +37,16 @@ class AppController extends BaseController
 
         // Beállítja a JeffAdmin layoutot (plugin templates/layout/default.php).
         $this->viewBuilder()->setLayout('JeffAdmin.default');
+
+        // Lista lapozás — globális: config/paginate.php → JeffAdmin.paginate.limit / maxLimit.
+        // Helyi felülírás: a controller index()-ben $this->paginate['limit'] = …;
+        $paginateCfg = Configure::read('JeffAdmin.paginate') ?? [];
+        if (isset($paginateCfg['limit'])) {
+            $this->paginate['limit'] = max(1, (int)$paginateCfg['limit']);
+        }
+        if (isset($paginateCfg['maxLimit'])) {
+            $this->paginate['maxLimit'] = max(1, (int)$paginateCfg['maxLimit']);
+        }
     }
 
     public function beforeFilter(EventInterface $event): void
